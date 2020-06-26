@@ -88,7 +88,7 @@ public class BankPluginTest
 			.thenReturn(60_000);
 
 		// 400k GE Price * 30 = 12m
-		when(itemManager.getItemPrice(itemId))
+		when((int)itemManager.getItemPrice(itemId))
 			.thenReturn(400_000);
 		when(itemManager.getItemComposition(itemId))
 			.thenReturn(comp);

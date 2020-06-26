@@ -144,4 +144,30 @@ public class RaidsPluginTest
 
 		assertFalse(raidsPlugin.getRotationMatches());
 	}
+
+	@Test
+	public void testLootValue()
+	{
+		when(raidsConfig.showLootValue()).thenReturn(true);
+
+		ItemContainer itemContainer = mock(ItemContainer.class);
+		when(itemContainer.getItems()).thenReturn(new Item[]{
+			new Item(ItemID.TWISTED_BOW, 1),
+			new Item(ItemID.PURE_ESSENCE, 42)
+		});
+		when(client.getItemContainer(InventoryID.CHAMBERS_OF_XERIC_CHEST)).thenReturn(itemContainer);
+
+		when((int)itemManager.getItemPrice(ItemID.TWISTED_BOW)).thenReturn(1_100_000_000);
+		when((int)itemManager.getItemPrice(ItemID.PURE_ESSENCE)).thenReturn(6);
+
+		WidgetLoaded widgetLoaded = new WidgetLoaded();
+		widgetLoaded.setGroupId(WidgetID.CHAMBERS_OF_XERIC_REWARD_GROUP_ID);
+		raidsPlugin.onWidgetLoaded(widgetLoaded);
+
+		ArgumentCaptor<QueuedMessage> captor = ArgumentCaptor.forClass(QueuedMessage.class);
+		verify(chatMessageManager).queue(captor.capture());
+
+		QueuedMessage queuedMessage = captor.getValue();
+		assertEquals("<colNORMAL>Your loot is worth around <colHIGHLIGHT>1,100,000,252<colNORMAL> coins.", queuedMessage.getRuneLiteFormattedMessage());
+	}
 }

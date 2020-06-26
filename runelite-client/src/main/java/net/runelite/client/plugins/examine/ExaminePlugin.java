@@ -324,7 +324,9 @@ public class ExaminePlugin extends Plugin
 	{
 		// quantity is at least 1
 		quantity = Math.max(1, quantity);
-		final int gePrice = itemManager.getItemPrice(id);
+
+		int itemCompositionPrice = itemComposition.getPrice();
+		final long gePrice = itemManager.getItemPrice(id, 1);
 		final int alchPrice = itemComposition.getHaPrice();
 
 		if (gePrice > 0 || alchPrice > 0)
