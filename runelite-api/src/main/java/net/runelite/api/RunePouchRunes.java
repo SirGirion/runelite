@@ -22,11 +22,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.runepouch;
+package net.runelite.api;
 
 
-import com.google.common.collect.ImmutableMap;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,7 +52,7 @@ import static net.runelite.api.ItemID.STEAM_RUNE;
 import static net.runelite.api.ItemID.WATER_RUNE;
 import static net.runelite.api.ItemID.WRATH_RUNE;
 
-public enum Runes
+public enum RunePouchRunes
 {
 	AIR(1, AIR_RUNE),
 	WATER(2, WATER_RUNE),
@@ -85,25 +85,23 @@ public enum Runes
 	@Setter
 	private BufferedImage image;
 
-	private static final Map<Integer, Runes> runes;
+	private static final Map<Integer, RunePouchRunes> runes = new HashMap<>();
 
 	static
 	{
-		ImmutableMap.Builder<Integer, Runes> builder = new ImmutableMap.Builder<>();
-		for (Runes rune : values())
+		for (RunePouchRunes rune : values())
 		{
-			builder.put(rune.getId(), rune);
+			runes.put(rune.getId(), rune);
 		}
-		runes = builder.build();
 	}
 
-	Runes(int id, int itemId)
+	RunePouchRunes(int id, int itemId)
 	{
 		this.id = id;
 		this.itemId = itemId;
 	}
 
-	public static Runes getRune(int varbit)
+	public static RunePouchRunes getRune(int varbit)
 	{
 		return runes.get(varbit);
 	}

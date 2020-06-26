@@ -69,7 +69,7 @@ public interface DailyTasksConfig extends Config
 	@ConfigItem(
 		position = 4,
 		keyName = "showRunes",
-		name = "Show Claimable Random Runes",
+		name = "Show Claimable Random RunePouchRunes",
 		description = "Show a message when you can collect your daily random runes from Lundail."
 	)
 	default boolean showRunes()

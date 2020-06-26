@@ -405,7 +405,7 @@ public class GroundItemsPlugin extends Plugin
 		}
 		else
 		{
-			groundItem.setGePrice(itemManager.getItemPrice(realItemId));
+			groundItem.setGePrice((int) itemManager.getItemPrice(realItemId));
 		}
 
 		return groundItem;

@@ -177,8 +177,8 @@ public class RaidsPluginTest
 		});
 		when(client.getItemContainer(InventoryID.CHAMBERS_OF_XERIC_CHEST)).thenReturn(itemContainer);
 
-		when(itemManager.getItemPrice(ItemID.TWISTED_BOW)).thenReturn(1_100_000_000);
-		when(itemManager.getItemPrice(ItemID.PURE_ESSENCE)).thenReturn(6);
+		when((int)itemManager.getItemPrice(ItemID.TWISTED_BOW)).thenReturn(1_100_000_000);
+		when((int)itemManager.getItemPrice(ItemID.PURE_ESSENCE)).thenReturn(6);
 
 		WidgetLoaded widgetLoaded = new WidgetLoaded();
 		widgetLoaded.setGroupId(WidgetID.CHAMBERS_OF_XERIC_REWARD_GROUP_ID);
