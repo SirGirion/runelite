@@ -39,7 +39,6 @@ import net.runelite.api.GameState;
 import net.runelite.api.NPC;
 import net.runelite.api.NpcID;
 import net.runelite.api.Projectile;
-import net.runelite.api.ProjectileID;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.ChatMessage;
@@ -331,7 +330,7 @@ public class HydraPlugin extends Plugin
 				// Only add 9 to next special on the first poison projectile (whoops)
 				hydra.setNextSpecial(hydra.getNextSpecial() + 9);
 			}
-			if (id == HYDRA_POISON) poisonProjectiles.put(event.getPosition(), projectile);
+			if (id == PROJ_HYDRA_POISON) poisonProjectiles.put(event.getPosition(), projectile);
 		}
 		else if (client.getTickCount() != lastAttackTick
 			&& (id == Hydra.AttackStyle.MAGIC.getProjectileID() || id == Hydra.AttackStyle.RANGED.getProjectileID()))

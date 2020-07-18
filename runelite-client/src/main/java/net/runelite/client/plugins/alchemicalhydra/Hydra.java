@@ -30,6 +30,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.NPC;
 import net.runelite.api.Prayer;
 import net.runelite.api.SpriteID;
@@ -39,6 +40,7 @@ import net.runelite.client.util.ImageUtil;
 @Getter(AccessLevel.PACKAGE)
 @RequiredArgsConstructor
 @Singleton
+@Slf4j
 class Hydra
 {
 	@Getter(AccessLevel.PACKAGE)
@@ -85,6 +87,7 @@ class Hydra
 
 	void changePhase(HydraPhase newPhase)
 	{
+		log.debug("Changing phase to: {}", newPhase);
 		phase = newPhase;
 		nextSpecial = 3;
 		attackCount = 0;
