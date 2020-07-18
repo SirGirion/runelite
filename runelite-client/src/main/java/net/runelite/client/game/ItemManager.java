@@ -292,12 +292,12 @@ public class ItemManager
 	 * @param itemID item id
 	 * @return item price
 	 */
-	public long getItemPrice(int itemID)
+	public int getItemPrice(int itemID)
 	{
 		return getItemPrice(itemID, 1);
 	}
 
-	public long getItemPrice(int itemID, int quantity)
+	public int getItemPrice(int itemID, int quantity)
 	{
 		return getItemPrice(itemID, quantity, false);
 	}
@@ -309,7 +309,7 @@ public class ItemManager
 	 * @param ignoreUntradeableMap should the price returned ignore the {@link UntradeableItemMapping}
 	 * @return item price
 	 */
-	public long getItemPrice(int itemID, int quantity, boolean ignoreUntradeableMap)
+	public int getItemPrice(int itemID, int quantity, boolean ignoreUntradeableMap)
 	{
 		assert client.isClientThread() : "getItemPrice must be called on client thread";
 
@@ -371,7 +371,7 @@ public class ItemManager
 			}
 		}
 
-		return (long) price * quantity;
+		return price * quantity;
 	}
 
 	/**
