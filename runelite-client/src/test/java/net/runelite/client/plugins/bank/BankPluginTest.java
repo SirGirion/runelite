@@ -126,7 +126,7 @@ public class BankPluginTest
 		when(itemManager.getItemComposition(ItemID.ABYSSAL_WHIP))
 			.thenReturn(whipComp);
 		when(itemManager.getItemPrice(ItemID.ABYSSAL_WHIP))
-			.thenReturn(3L); // 1b * 3 overflows
+			.thenReturn(3); // 1b * 3 overflows
 
 		final ContainerPrices prices = bankPlugin.calculate(items);
 		assertNotNull(prices);

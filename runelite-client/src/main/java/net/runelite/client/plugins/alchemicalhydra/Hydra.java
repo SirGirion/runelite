@@ -47,10 +47,11 @@ class Hydra
 	@RequiredArgsConstructor
 	enum AttackStyle
 	{
-		MAGIC(HydraPlugin.PROJ_HYDRA_MAGIC, Prayer.PROTECT_FROM_MAGIC, SpriteID.PRAYER_PROTECT_FROM_MAGIC),
-		RANGED(HydraPlugin.PROJ_HYDRA_RANGED, Prayer.PROTECT_FROM_MISSILES, SpriteID.PRAYER_PROTECT_FROM_MISSILES);
+		MAGIC(HydraPlugin.PROJ_HYDRA_MAGIC, HydraPlugin.SOUND_EFFECT_MAGE, Prayer.PROTECT_FROM_MAGIC, SpriteID.PRAYER_PROTECT_FROM_MAGIC),
+		RANGED(HydraPlugin.PROJ_HYDRA_RANGED, HydraPlugin.SOUND_EFFECT_RANGE, Prayer.PROTECT_FROM_MISSILES, SpriteID.PRAYER_PROTECT_FROM_MISSILES);
 
 		private final int projectileID;
+		private final int soundID;
 		private final Prayer prayer;
 		private final int spriteID;
 
@@ -113,6 +114,35 @@ class Hydra
 		if (id != nextAttack.getProjectileID())
 		{
 			if (id == lastAttack.getProjectileID())
+			{
+				// If the current attack isn't what was expected and we accidentally counted 1 too much
+				return;
+			}
+
+			// If the current attack isn't what was expected and we should have switched prayers
+			switchStyles();
+			nextSwitch = phase.getAttacksPerSwitch() - 1;
+		}
+		else
+		{
+			nextSwitch--;
+		}
+
+		lastAttack = nextAttack;
+		attackCount++;
+
+		if (nextSwitch <= 0)
+		{
+			switchStyles();
+			nextSwitch = phase.getAttacksPerSwitch();
+		}
+	}
+
+	void handleAttackSound(int id)
+	{
+		if (id != nextAttack.getSoundID())
+		{
+			if (id == lastAttack.getSoundID())
 			{
 				// If the current attack isn't what was expected and we accidentally counted 1 too much
 				return;

@@ -41,6 +41,7 @@ import net.runelite.api.NpcID;
 import net.runelite.api.Projectile;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.events.AnimationChanged;
+import net.runelite.api.events.AreaSoundEffectPlayed;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -105,6 +106,9 @@ public class HydraPlugin extends Plugin
 	static final int ANIM_HYDRA_3_2 = 8252;
 	static final int ANIM_HYDRA_4_1 = 8257;
 	static final int ANIM_HYDRA_4_2 = 8258;
+
+	static final int SOUND_EFFECT_RANGE = 4089;
+	static final int SOUND_EFFECT_MAGE = 4103;
 
 	public static final int BIG_ASS_GUTHIX_SPELL = 1774;
 	public static final int BIG_SUPERHEAT = 1800;
@@ -337,6 +341,24 @@ public class HydraPlugin extends Plugin
 		{
 			log.debug("projMoved: handling attack");
 			hydra.handleAttack(id);
+			lastAttackTick = client.getTickCount();
+		}
+	}
+
+	@Subscribe
+	public void onAreaSoundEffectPlayed(AreaSoundEffectPlayed event)
+	{
+		if (!inHydraInstance || hydra == null)
+		{
+			return;
+		}
+		int id = event.getSoundId();
+
+		if (client.getTickCount() != lastAttackTick
+			&& (id == Hydra.AttackStyle.MAGIC.getSoundID() || id == Hydra.AttackStyle.RANGED.getSoundID()))
+		{
+			log.debug("soundEffectPlayed: handling attack");
+			hydra.handleAttackSound(id);
 			lastAttackTick = client.getTickCount();
 		}
 	}
