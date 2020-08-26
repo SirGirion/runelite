@@ -77,20 +77,19 @@ public class MotherlodeOreOverlay extends OverlayPanel
 			return null;
 		}
 
-		panelComponent.getChildren().add(TitleComponent.builder().text("Ores found").build());
-
 		if (config.showLootAsItems())
 		{
 			panelComponent.setOrientation(ComponentOrientation.HORIZONTAL);
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.GOLDEN_NUGGET, nuggetsFound)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.COAL, coalFound)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.GOLD_ORE, goldFound)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.MITHRIL_ORE, mithrilFound)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.ADAMANTITE_ORE, adamantiteFound)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.RUNITE_ORE, runiteFound)));
+			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.GOLDEN_NUGGET, nuggetsFound, true)));
+			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.COAL, coalFound, true)));
+			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.GOLD_ORE, goldFound, true)));
+			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.MITHRIL_ORE, mithrilFound, true)));
+			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.ADAMANTITE_ORE, adamantiteFound, true)));
+			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.RUNITE_ORE, runiteFound, true)));
 		}
 		else
 		{
+			panelComponent.getChildren().add(TitleComponent.builder().text("Ores found").build());
 			panelComponent.setOrientation(ComponentOrientation.VERTICAL);
 			if (nuggetsFound > 0)
 			{
