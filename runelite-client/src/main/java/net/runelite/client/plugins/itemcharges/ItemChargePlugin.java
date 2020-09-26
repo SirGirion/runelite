@@ -508,6 +508,15 @@ public class ItemChargePlugin extends Plugin
 				case ItemID.EXPEDITIOUS_BRACELET:
 					updateExpeditiousBraceletCharges(MAX_EXPEDITIOUS_BRACELET_CHARGES);
 					break;
+				case ItemID.DODGY_NECKLACE:
+					updateDodgyNecklaceCharges(MAX_DODGY_CHARGES);
+					break;
+				case ItemID.RING_OF_FORGING:
+					updateRingOfForgingCharges(MAX_RING_OF_FORGING_CHARGES);
+					break;
+				case ItemID.AMULET_OF_CHEMISTRY:
+					updateAmuletOfChemistryCharges(MAX_AMULET_OF_CHEMISTRY_CHARGES);
+					break;
 			}
 		}
 	}
@@ -641,20 +650,9 @@ public class ItemChargePlugin extends Plugin
 			return;
 		}
 
-		switch (widgetDestroyItemName.getText())
+		if (widgetDestroyItemName.getText().equals("Binding necklace"))
 		{
-			case "Binding necklace":
-				updateBindingNecklaceCharges(MAX_BINDING_CHARGES);
-				break;
-			case "Dodgy necklace":
-				updateDodgyNecklaceCharges(MAX_DODGY_CHARGES);
-				break;
-			case "Ring of forging":
-				updateRingOfForgingCharges(MAX_RING_OF_FORGING_CHARGES);
-				break;
-			case "Amulet of chemistry":
-				updateAmuletOfChemistryCharges(MAX_AMULET_OF_CHEMISTRY_CHARGES);
-				break;
+			updateBindingNecklaceCharges(MAX_BINDING_CHARGES);
 		}
 	}
 
