@@ -40,6 +40,8 @@ enum ItemWithSlot
 	BINDING_NECKLACE(ItemChargeType.BINDING_NECKLACE, EquipmentInventorySlot.AMULET),
 	EXPLORER_RING(ItemChargeType.EXPLORER_RING, EquipmentInventorySlot.RING),
 	RING_OF_FORGING(ItemChargeType.RING_OF_FORGING, EquipmentInventorySlot.RING),
+	BRACELET_OF_SLAUGHTER(ItemChargeType.BRACELET_OF_SLAUGHTER, EquipmentInventorySlot.GLOVES),
+	EXPEDITIOUS_BRACELET(ItemChargeType.EXPEDITIOUS_BRACELET, EquipmentInventorySlot.GLOVES),
 	TELEPORT(ItemChargeType.TELEPORT, EquipmentInventorySlot.WEAPON, EquipmentInventorySlot.AMULET, EquipmentInventorySlot.GLOVES, EquipmentInventorySlot.RING);
 
 	private final ItemChargeType type;
