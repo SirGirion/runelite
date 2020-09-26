@@ -115,6 +115,24 @@ class ItemChargeOverlay extends WidgetItemOverlay
 
 			charges = config.amuletOfBounty();
 		}
+		else if (itemId == ItemID.BRACELET_OF_SLAUGHTER)
+		{
+			if (!config.showBraceletOfSlaughterCount())
+			{
+				return;
+			}
+
+			charges = config.braceletOfSlaughter();
+		}
+		else if (itemId == ItemID.EXPEDITIOUS_BRACELET)
+		{
+			if (!config.showExpeditiousBraceletCount())
+			{
+				return;
+			}
+
+			charges = config.expeditiousBracelet();
+		}
 		else
 		{
 			ItemWithCharge chargeItem = ItemWithCharge.findItem(itemId);
