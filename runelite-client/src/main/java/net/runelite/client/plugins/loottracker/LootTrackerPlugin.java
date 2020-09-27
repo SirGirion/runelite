@@ -726,7 +726,7 @@ public class LootTrackerPlugin extends Plugin
 		}
 
 		// Check if message is a birdhouse type
-		final Matcher matcher = BIRDHOUSE_PATTERN.matcher(Text.removeTags(message));
+		final Matcher matcher = BIRDHOUSE_PATTERN.matcher(message);
 		if (matcher.matches())
 		{
 			final int xp = Integer.parseInt(matcher.group(1));
