@@ -291,23 +291,23 @@ public class LootTrackerPluginTest
 	}
 
 	@Test
-	public void testBirdhouseTrackers()
+	public void testBirdhouses()
 	{
-		// Test case of no bird nests
+		// No bird nests
 		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.SPAM, "", "You dismantle and discard the trap, retrieving 10 dead birds, 30 feathers and 1140 Hunter XP.", "", 0);
 		lootTrackerPlugin.onChatMessage(chatMessage);
 
 		assertEquals("Magic Bird House", lootTrackerPlugin.eventType);
 		assertEquals(LootRecordType.EVENT, lootTrackerPlugin.lootRecordType);
 
-		// Test case of single bird nest
+		// Single bird nest
 		chatMessage = new ChatMessage(null, ChatMessageType.SPAM, "", "You dismantle and discard the trap, retrieving a nest, 10 dead birds, 50 feathers and 700 Hunter XP.", "", 0);
 		lootTrackerPlugin.onChatMessage(chatMessage);
 
 		assertEquals("Teak Bird House", lootTrackerPlugin.eventType);
 		assertEquals(LootRecordType.EVENT, lootTrackerPlugin.lootRecordType);
 
-		// Test cases of multiple nests
+		// Multiple nests
 		chatMessage = new ChatMessage(null, ChatMessageType.SPAM, "", "You dismantle and discard the trap, retrieving 2 nests, 10 dead birds, 40 feathers and 280 Hunter XP.", "", 0);
 		lootTrackerPlugin.onChatMessage(chatMessage);
 
