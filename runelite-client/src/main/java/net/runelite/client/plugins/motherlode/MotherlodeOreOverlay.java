@@ -77,7 +77,7 @@ public class MotherlodeOreOverlay extends OverlayPanel
 			return null;
 		}
 
-		if (config.showLootAsItems())
+		if (config.showLootIcons())
 		{
 			panelComponent.setOrientation(ComponentOrientation.HORIZONTAL);
 			if (nuggetsFound > 0)
