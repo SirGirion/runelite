@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2019, Weird Gloop <admin@weirdgloop.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,33 +22,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.timers;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import net.runelite.client.plugins.Plugin;
-import net.runelite.client.ui.overlay.infobox.InfoBoxPriority;
-import net.runelite.client.ui.overlay.infobox.Timer;
+package net.runelite.client.plugins.crowdsourcing.dialogue;
 
-class TimerTimer extends Timer
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class DialogueOptionsData
 {
-	private final GameTimer timer;
-
-	TimerTimer(GameTimer timer, Duration duration, Plugin plugin)
-	{
-		super(duration.toMillis(), ChronoUnit.MILLIS, null, plugin);
-		this.timer = timer;
-		setPriority(InfoBoxPriority.MED);
-	}
-
-	public GameTimer getTimer()
-	{
-		return timer;
-	}
-
-	@Override
-	public String getName()
-	{
-		return timer.name();
-	}
+	private final String[] options;
 }
