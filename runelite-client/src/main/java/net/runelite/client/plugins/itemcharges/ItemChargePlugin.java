@@ -58,6 +58,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
+import net.runelite.client.util.Text;
 
 @PluginDescriptor(
 	name = "Item Charges",
@@ -100,6 +101,7 @@ public class ItemChargePlugin extends Plugin
 	private static final String AMULET_OF_BOUNTY_BREAK_TEXT = "Your amulet of bounty saves some seeds for you. <col=ff0000>It then crumbles to dust.</col>";
 
 	private static final String CHAT_BRACELET_SLAUGHTER = "Your bracelet of slaughter prevents your slayer";
+<<<<<<< HEAD
 	private static final Pattern CHAT_BRACELET_SLAUGHTER_REGEX = Pattern.compile("Your bracelet of slaughter prevents your slayer count from decreasing\\. <col=ff0000>It has (\\d{1,2}) charge[s]? left\\.</col>");
 	private static final String CHAT_BRACELET_EXPEDITIOUS = "Your expeditious bracelet helps you progress your";
 	private static final Pattern CHAT_BRACELET_EXPEDITIOUS_REGEX = Pattern.compile("Your expeditious bracelet helps you progress your slayer (?:task )?faster\\. <col=ff0000>It has (\\d{1,2}) charge[s]? left\\.</col>");
@@ -107,6 +109,15 @@ public class ItemChargePlugin extends Plugin
 	private static final Pattern CHAT_BRACELET_SLAUGHTER_CHARGE_REGEX = Pattern.compile("Your bracelet of slaughter has (\\d{1,2}) charge[s]? left.");
 	private static final String CHAT_BRACELET_EXPEDITIOUS_CHARGE = "Your expeditious bracelet has ";
 	private static final Pattern CHAT_BRACELET_EXPEDITIOUS_CHARGE_REGEX = Pattern.compile("Your expeditious bracelet has (\\d{1,2}) charge[s]? left.");
+=======
+	private static final Pattern CHAT_BRACELET_SLAUGHTER_REGEX = Pattern.compile("Your bracelet of slaughter prevents your slayer count from decreasing\\. It has (\\d{1,2}) charges? left\\.");
+	private static final String CHAT_BRACELET_EXPEDITIOUS = "Your expeditious bracelet helps you progress your";
+	private static final Pattern CHAT_BRACELET_EXPEDITIOUS_REGEX = Pattern.compile("Your expeditious bracelet helps you progress your slayer (?:task )?faster\\. It has (\\d{1,2}) charges? left\\.");
+	private static final String CHAT_BRACELET_SLAUGHTER_CHARGE = "Your bracelet of slaughter has ";
+	private static final Pattern CHAT_BRACELET_SLAUGHTER_CHARGE_REGEX = Pattern.compile("Your bracelet of slaughter has (\\d{1,2}) charges? left\\.");
+	private static final String CHAT_BRACELET_EXPEDITIOUS_CHARGE = "Your expeditious bracelet has ";
+	private static final Pattern CHAT_BRACELET_EXPEDITIOUS_CHARGE_REGEX = Pattern.compile("Your expeditious bracelet has (\\d{1,2}) charges? left\\.");
+>>>>>>> feature/slayer-bracelet-charges
 
 	private static final int MAX_DODGY_CHARGES = 10;
 	private static final int MAX_BINDING_CHARGES = 16;
@@ -364,7 +375,8 @@ public class ItemChargePlugin extends Plugin
 			}
 			else if (message.startsWith(CHAT_BRACELET_SLAUGHTER))
 			{
-				Matcher mSlaughter = CHAT_BRACELET_SLAUGHTER_REGEX.matcher(message);
+				String strippedMessage = Text.removeTags(message);
+				Matcher mSlaughter = CHAT_BRACELET_SLAUGHTER_REGEX.matcher(strippedMessage);
 
 				final int slaughterChargeCount = mSlaughter.find() ? Integer.parseInt(mSlaughter.group(1)) : MAX_BRACELET_OF_SLAUGHTER_CHARGES;
 				if (config.braceletOfSlaughterNotification() && slaughterChargeCount == MAX_BRACELET_OF_SLAUGHTER_CHARGES)
@@ -376,7 +388,8 @@ public class ItemChargePlugin extends Plugin
 			}
 			else if (message.startsWith(CHAT_BRACELET_EXPEDITIOUS))
 			{
-				Matcher mExpeditious = CHAT_BRACELET_EXPEDITIOUS_REGEX.matcher(message);
+				String strippedMessage = Text.removeTags(message);
+				Matcher mExpeditious = CHAT_BRACELET_EXPEDITIOUS_REGEX.matcher(strippedMessage);
 
 				final int expeditiousChargeCount = mExpeditious.find() ? Integer.parseInt(mExpeditious.group(1)) : MAX_EXPEDITIOUS_BRACELET_CHARGES;
 				if (config.expeditiousBraceletNotification() && expeditiousChargeCount == MAX_EXPEDITIOUS_BRACELET_CHARGES)
@@ -388,7 +401,9 @@ public class ItemChargePlugin extends Plugin
 			}
 			else if (message.startsWith(CHAT_BRACELET_SLAUGHTER_CHARGE))
 			{
-				Matcher mSlaughter = CHAT_BRACELET_SLAUGHTER_CHARGE_REGEX.matcher(message);
+				String strippedMessage = Text.removeTags(message);
+				Matcher mSlaughter = CHAT_BRACELET_SLAUGHTER_CHARGE_REGEX.matcher(strippedMessage);
+
 				if (!mSlaughter.find())
 				{
 					return;
@@ -398,7 +413,9 @@ public class ItemChargePlugin extends Plugin
 			}
 			else if (message.startsWith(CHAT_BRACELET_EXPEDITIOUS_CHARGE))
 			{
-				Matcher mExpeditious = CHAT_BRACELET_EXPEDITIOUS_CHARGE_REGEX.matcher(message);
+
+				String strippedMessage = Text.removeTags(message);
+				Matcher mExpeditious = CHAT_BRACELET_EXPEDITIOUS_CHARGE_REGEX.matcher(strippedMessage);
 
 				if (!mExpeditious.find())
 				{
