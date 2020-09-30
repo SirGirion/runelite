@@ -125,11 +125,11 @@ public interface MotherlodeConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "showLootAsItems",
-		name = "Toggle item icons",
-		description = "Shows the gems/ores as their items rather than text"
+		keyName = "showLootIcons",
+		name = "Show ore icons",
+		description = "Display collected ores and gems as item images instead of text"
 	)
-	default boolean showLootAsItems()
+	default boolean showLootIcons()
 	{
 		return false;
 	}

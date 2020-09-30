@@ -446,23 +446,7 @@ public class ItemManager
 	 */
 	public AsyncBufferedImage getImage(int itemId)
 	{
-		return getImage(itemId, 1);
-	}
-
-	/**
-	 * Get item sprite image as BufferedImage.
-	 * <p>
-	 * This method may return immediately with a blank image if not called on the game thread.
-	 * The image will be filled in later. If this is used for a UI label/button, it should be added
-	 * using AsyncBufferedImage::addTo to ensure it is painted properly
-	 *
-	 * @param itemId
-	 * @param quantity
-	 * @return
-	 */
-	public AsyncBufferedImage getImage(int itemId, int quantity)
-	{
-		return getImage(itemId, quantity, false);
+		return getImage(itemId, 1, false);
 	}
 
 	/**

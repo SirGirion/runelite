@@ -83,7 +83,7 @@ public class MotherlodeGemOverlay extends OverlayPanel
 		int emeraldsFound = session.getEmeraldsFound();
 		int sapphiresFound = session.getSapphiresFound();
 
-		if (config.showLootAsItems())
+		if (config.showLootIcons())
 		{
 			panelComponent.setOrientation(ComponentOrientation.HORIZONTAL);
 			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_DIAMOND, diamondsFound, true)));
