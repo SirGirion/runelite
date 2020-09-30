@@ -71,21 +71,39 @@ public class MotherlodeOreOverlay extends OverlayPanel
 		int runiteFound = session.getRuniteFound();
 
 		// If no ores have even been collected, don't bother showing anything
-		// This will statement is true iff all ore counts are 0
-		if ((nuggetsFound | coalFound | goldFound | mithrilFound | adamantiteFound | runiteFound) == 0)
+		if (nuggetsFound == 0 || coalFound == 0 || goldFound == 0 || mithrilFound == 0
+			|| adamantiteFound == 0 || runiteFound == 0)
 		{
 			return null;
 		}
 
-		if (config.showLootAsItems())
+		if (config.showLootIcons())
 		{
 			panelComponent.setOrientation(ComponentOrientation.HORIZONTAL);
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.GOLDEN_NUGGET, nuggetsFound, true)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.COAL, coalFound, true)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.GOLD_ORE, goldFound, true)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.MITHRIL_ORE, mithrilFound, true)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.ADAMANTITE_ORE, adamantiteFound, true)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.RUNITE_ORE, runiteFound, true)));
+			if (nuggetsFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.GOLDEN_NUGGET, nuggetsFound, true)));
+			}
+			if (coalFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.COAL, coalFound, true)));
+			}
+			if (goldFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.GOLD_ORE, goldFound, true)));
+			}
+			if (mithrilFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.MITHRIL_ORE, mithrilFound, true)));
+			}
+			if (adamantiteFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.ADAMANTITE_ORE, adamantiteFound, true)));
+			}
+			if (runiteFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.RUNITE_ORE, runiteFound, true)));
+			}
 		}
 		else
 		{
