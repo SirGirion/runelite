@@ -86,6 +86,11 @@ enum Emoji
 	WAVE("(^_^)/"),
 	HEART_EYES("(*.*)"),
 	FACEPALM("M-)"),
+	PENSIVE("V_V"),
+	ACORN("<lt>D~"), // <D~
+	GORILLA(":G"),
+	PLEADING("(n_n)"),
+	XD("Xd"),
 	;
 
 	private static final Map<String, Emoji> emojiMap;

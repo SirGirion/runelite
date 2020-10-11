@@ -28,6 +28,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.google.common.html.HtmlEscapers;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -36,7 +37,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +47,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,6 +58,7 @@ import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
@@ -85,7 +88,6 @@ import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.LinkBrowser;
 import net.runelite.client.util.SwingUtil;
 import net.runelite.client.util.VerificationException;
-import org.apache.commons.text.similarity.JaroWinklerDistance;
 
 @Slf4j
 @Singleton
@@ -97,7 +99,6 @@ class PluginHubPanel extends PluginPanel
 	private static final ImageIcon CONFIGURE_ICON;
 	private static final ImageIcon CONFIGURE_ICON_HOVER;
 	private static final Pattern SPACES = Pattern.compile(" +");
-	private static final JaroWinklerDistance DISTANCE = new JaroWinklerDistance();
 
 	static
 	{
@@ -113,20 +114,19 @@ class PluginHubPanel extends PluginPanel
 		CONFIGURE_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(configureIcon, -100));
 	}
 
-	private class PluginItem extends JPanel
+	private class PluginItem extends JPanel implements SearchablePlugin
 	{
 		private static final int HEIGHT = 70;
 		private static final int ICON_WIDTH = 48;
 		private static final int BOTTOM_LINE_HEIGHT = 16;
-		static final float MIN_FILTER_SCORE = .8f;
 
 		private final ExternalPluginManifest manifest;
 
 		@Getter
-		private final boolean installed;
+		private final List<String> keywords = new ArrayList<>();
 
 		@Getter
-		private float filter;
+		private final boolean installed;
 
 		PluginItem(ExternalPluginManifest newManifest, Collection<Plugin> loadedPlugins, boolean installed)
 		{
@@ -138,6 +138,23 @@ class PluginHubPanel extends PluginPanel
 
 			manifest = newManifest == null ? loaded : newManifest;
 			this.installed = installed;
+
+			if (manifest != null)
+			{
+				Collections.addAll(keywords, SPACES.split(manifest.getDisplayName().toLowerCase()));
+
+				if (manifest.getDescription() != null)
+				{
+					Collections.addAll(keywords, SPACES.split(manifest.getDescription().toLowerCase()));
+				}
+
+				Collections.addAll(keywords, manifest.getAuthor().toLowerCase());
+
+				if (manifest.getTags() != null)
+				{
+					Collections.addAll(keywords, manifest.getTags());
+				}
+			}
 
 			setBackground(ColorScheme.DARKER_GRAY_COLOR);
 			setOpaque(true);
@@ -157,8 +174,14 @@ class PluginHubPanel extends PluginPanel
 			version.setFont(FontManager.getRunescapeSmallFont());
 			version.setToolTipText(manifest.getVersion());
 
-			JLabel description = new JLabel(manifest.getDescription());
-			description.setToolTipText(manifest.getDescription());
+			String descriptionText = manifest.getDescription();
+			if (!descriptionText.startsWith("<html>"))
+			{
+				descriptionText = "<html>" + HtmlEscapers.htmlEscaper().escape(descriptionText) + "</html>";
+			}
+			JLabel description = new JLabel(descriptionText);
+			description.setVerticalAlignment(JLabel.TOP);
+			description.setToolTipText(descriptionText);
 
 			JLabel icon = new JLabel();
 			icon.setHorizontalAlignment(JLabel.CENTER);
@@ -186,7 +209,6 @@ class PluginHubPanel extends PluginPanel
 			JButton help = new JButton(HELP_ICON);
 			help.setRolloverIcon(HELP_ICON_HOVER);
 			SwingUtil.removeButtonDecorations(help);
-			help.setToolTipText("Help");
 			help.setBorder(null);
 			if (manifest.getSupport() == null)
 			{
@@ -194,6 +216,7 @@ class PluginHubPanel extends PluginPanel
 			}
 			else
 			{
+				help.setToolTipText("Open help: " + manifest.getSupport().toString());
 				help.addActionListener(ev -> LinkBrowser.browse(manifest.getSupport().toString()));
 			}
 
@@ -242,7 +265,23 @@ class PluginHubPanel extends PluginPanel
 			{
 				addrm.setText("Install");
 				addrm.setBackground(new Color(0x28BE28));
-				addrm.addActionListener(l -> externalPluginManager.install(manifest.getInternalName()));
+				addrm.addActionListener(l ->
+				{
+					if (manifest.getWarning() != null)
+					{
+						int result = JOptionPane.showConfirmDialog(
+							this,
+							"<html><p>" + manifest.getWarning() + "</p><strong>Are you sure you want to install this plugin?</strong></html>",
+							"Installing " + manifest.getDisplayName(),
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.WARNING_MESSAGE);
+						if (result != JOptionPane.OK_OPTION)
+						{
+							return;
+						}
+					}
+					externalPluginManager.install(manifest.getInternalName());
+				});
 			}
 			else if (remove)
 			{
@@ -277,15 +316,16 @@ class PluginHubPanel extends PluginPanel
 						.addComponent(addrm, 0, 50, GroupLayout.PREFERRED_SIZE)
 						.addGap(5))));
 
+			int lineHeight = description.getFontMetrics(description.getFont()).getHeight();
 			layout.setVerticalGroup(layout.createParallelGroup()
-				.addComponent(icon, HEIGHT, HEIGHT, HEIGHT)
+				.addComponent(icon, HEIGHT, GroupLayout.DEFAULT_SIZE, HEIGHT + lineHeight)
 				.addGroup(layout.createSequentialGroup()
 					.addGap(5)
 					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(pluginName)
 						.addComponent(author))
 					.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-					.addComponent(description)
+					.addComponent(description, lineHeight, GroupLayout.PREFERRED_SIZE, lineHeight * 2)
 					.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(version, BOTTOM_LINE_HEIGHT, BOTTOM_LINE_HEIGHT, BOTTOM_LINE_HEIGHT)
@@ -295,21 +335,10 @@ class PluginHubPanel extends PluginPanel
 					.addGap(5)));
 		}
 
-		float setFilter(String[] filter)
+		@Override
+		public String getSearchableName()
 		{
-			ToDoubleFunction<String> match = r -> Stream.of(filter)
-				.mapToDouble(l -> Math.pow(DISTANCE.apply(l, r), 2))
-				.max()
-				.orElse(0.D);
-
-			double sim = SPACES.splitAsStream(manifest.getDisplayName()).collect(Collectors.averagingDouble(match)) * 2;
-
-			if (manifest.getTags() != null)
-			{
-				sim += Stream.of(manifest.getTags()).mapToDouble(match).sum();
-			}
-
-			return this.filter = (float) sim;
+			return manifest.getDisplayName();
 		}
 	}
 
@@ -381,7 +410,9 @@ class PluginHubPanel extends PluginPanel
 			}
 		});
 
-		JLabel externalPluginWarning = new JLabel("<html>External plugins are not supported by the RuneLite Developers." +
+		JLabel externalPluginWarning = new JLabel("<html>External plugins are verified to not be " +
+			"malicious or rule-breaking, but are not " +
+			"maintained by the RuneLite developers. " +
 			"They may cause bugs or instability.</html>");
 		externalPluginWarning.setBackground(new Color(0xFFBB33));
 		externalPluginWarning.setForeground(Color.BLACK);
@@ -523,22 +554,19 @@ class PluginHubPanel extends PluginPanel
 
 		Stream<PluginItem> stream = plugins.stream();
 
-		String search = searchBar.getText();
-		boolean isSearching = search != null && !search.trim().isEmpty();
+		String query = searchBar.getText();
+		boolean isSearching = query != null && !query.trim().isEmpty();
 		if (isSearching)
 		{
-			String[] searchArray = SPACES.split(search.toLowerCase());
-			stream = stream
-				.filter(p -> p.setFilter(searchArray) > PluginItem.MIN_FILTER_SCORE)
-				.sorted(Comparator.comparing(PluginItem::getFilter));
+			PluginSearch.search(plugins, query).forEach(mainPanel::add);
 		}
 		else
 		{
-			stream = stream
-				.sorted(Comparator.comparing(PluginItem::isInstalled));
+			stream
+				.sorted(Comparator.comparing(PluginItem::isInstalled).thenComparing(p -> p.manifest.getDisplayName()))
+				.forEach(mainPanel::add);
 		}
 
-		stream.forEach(mainPanel::add);
 		mainPanel.revalidate();
 	}
 

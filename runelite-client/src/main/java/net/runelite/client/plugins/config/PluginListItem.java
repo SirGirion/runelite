@@ -52,12 +52,9 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
-import org.apache.commons.text.similarity.JaroWinklerDistance;
 
-class PluginListItem extends JPanel
+class PluginListItem extends JPanel implements SearchablePlugin
 {
-	private static final JaroWinklerDistance DISTANCE = new JaroWinklerDistance();
-
 	private static final ImageIcon CONFIG_ICON;
 	private static final ImageIcon CONFIG_ICON_HOVER;
 	private static final ImageIcon ON_STAR;
@@ -68,6 +65,7 @@ class PluginListItem extends JPanel
 	@Getter
 	private final PluginConfigurationDescriptor pluginConfig;
 
+	@Getter
 	private final List<String> keywords = new ArrayList<>();
 
 	private final JToggleButton pinButton;
@@ -99,10 +97,13 @@ class PluginListItem extends JPanel
 		ExternalPluginManifest mf = pluginConfig.getExternalPluginManifest();
 		if (mf != null)
 		{
+			keywords.add("pluginhub");
 			keywords.add(mf.getInternalName());
 		}
-
-		final List<JMenuItem> popupMenuItems = new ArrayList<>();
+		else
+		{
+			keywords.add("plugin"); // we don't want searching plugin to only show hub plugins
+		}
 
 		setLayout(new BorderLayout(3, 0));
 		setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH, 20));
@@ -187,7 +188,14 @@ class PluginListItem extends JPanel
 		}
 	}
 
-	boolean isPinned()
+	@Override
+	public String getSearchableName()
+	{
+		return pluginConfig.getName();
+	}
+
+	@Override
+	public boolean isPinned()
 	{
 		return pinButton.isSelected();
 	}
@@ -200,24 +208,6 @@ class PluginListItem extends JPanel
 	void setPluginEnabled(boolean enabled)
 	{
 		onOffToggle.setSelected(enabled);
-	}
-
-	/**
-	 * Checks if all the search terms in the given list matches at least one keyword.
-	 *
-	 * @return true if all search terms matches at least one keyword, or false if otherwise.
-	 */
-	boolean matchesSearchTerms(String[] searchTerms)
-	{
-		for (String term : searchTerms)
-		{
-			if (keywords.stream().noneMatch((t) -> t.contains(term) ||
-				DISTANCE.apply(t, term) > 0.9))
-			{
-				return false;
-			}
-		}
-		return true;
 	}
 
 	private void openGroupConfigPanel()

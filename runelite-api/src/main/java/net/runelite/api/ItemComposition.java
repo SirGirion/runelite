@@ -24,6 +24,8 @@
  */
 package net.runelite.api;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents the template of a specific item type.
  */
@@ -89,8 +91,17 @@ public interface ItemComposition
 	 * @return the general store value of the item
 	 *
 	 * @see Constants#HIGH_ALCHEMY_MULTIPLIER
+	 * @see ItemComposition#getHaPrice()
 	 */
 	int getPrice();
+
+	/**
+	 * Get the high alchemy price for this item. All items have a high alchemy price,
+	 * but not all items can be alched.
+	 *
+	 * @return the high alch price
+	 */
+	int getHaPrice();
 
 	/**
 	 * Checks whether the item is members only.
@@ -138,4 +149,29 @@ public interface ItemComposition
 	 * default value.
 	 */
 	void resetShiftClickActionIndex();
+
+	/**
+	 * Gets the model ID of the inventory item.
+	 *
+	 * @return the model ID
+	 */
+	int getInventoryModel();
+
+	/**
+	 * Since the client reuses item models, it stores colors that can be replaced.
+	 * This returns what colors the item model will be replaced with.
+	 *
+	 * @return the colors to replace with
+	 */
+	@Nullable
+	short[] getColorToReplaceWith();
+
+	/**
+	 * Since the client reuses item models, it stores textures that can be replaced.
+	 * This returns what textures the item model will be replaced with.
+	 *
+	 * @return the textures to replace with
+	 */
+	@Nullable
+	short[] getTextureToReplaceWith();
 }

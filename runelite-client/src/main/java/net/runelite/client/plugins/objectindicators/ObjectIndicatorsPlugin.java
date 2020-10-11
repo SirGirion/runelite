@@ -29,7 +29,7 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
-import java.awt.event.KeyEvent;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -47,6 +48,7 @@ import net.runelite.api.DecorativeObject;
 import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
 import net.runelite.api.GroundObject;
+import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ObjectComposition;
@@ -57,7 +59,6 @@ import net.runelite.api.WallObject;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.DecorativeObjectDespawned;
 import net.runelite.api.events.DecorativeObjectSpawned;
-import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
@@ -70,7 +71,6 @@ import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.input.KeyListener;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -83,7 +83,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 	enabledByDefault = false
 )
 @Slf4j
-public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
+public class ObjectIndicatorsPlugin extends Plugin
 {
 	private static final String CONFIG_GROUP = "objectindicators";
 	private static final String MARK = "Mark object";
@@ -91,9 +91,8 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 
 	private final Gson GSON = new Gson();
 	@Getter(AccessLevel.PACKAGE)
-	private final List<TileObject> objects = new ArrayList<>();
+	private final List<ColorTileObject> objects = new ArrayList<>();
 	private final Map<Integer, Set<ObjectPoint>> points = new HashMap<>();
-	private boolean hotKeyPressed;
 
 	@Inject
 	private Client client;
@@ -110,6 +109,9 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 	@Inject
 	private KeyManager keyManager;
 
+	@Inject
+	private ObjectIndicatorsConfig config;
+
 	@Provides
 	ObjectIndicatorsConfig provideConfig(ConfigManager configManager)
 	{
@@ -120,50 +122,14 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 	protected void startUp()
 	{
 		overlayManager.add(overlay);
-		keyManager.registerKeyListener(this);
 	}
 
 	@Override
 	protected void shutDown()
 	{
 		overlayManager.remove(overlay);
-		keyManager.unregisterKeyListener(this);
 		points.clear();
 		objects.clear();
-		hotKeyPressed = false;
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e)
-	{
-
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e)
-	{
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT)
-		{
-			hotKeyPressed = true;
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e)
-	{
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT)
-		{
-			hotKeyPressed = false;
-		}
-	}
-
-	@Subscribe
-	public void onFocusChanged(final FocusChanged event)
-	{
-		if (!event.isFocused())
-		{
-			hotKeyPressed = false;
-		}
 	}
 
 	@Subscribe
@@ -178,54 +144,50 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 		WallObject previous = event.getPrevious();
 		WallObject wallObject = event.getWallObject();
 
-		objects.remove(previous);
+		objects.removeIf(o -> o.getTileObject() == previous);
 		checkObjectPoints(wallObject);
 	}
 
 	@Subscribe
 	public void onWallObjectDespawned(WallObjectDespawned event)
 	{
-		objects.remove(event.getWallObject());
+		objects.removeIf(o -> o.getTileObject() == event.getWallObject());
 	}
 
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
-		final GameObject eventObject = event.getGameObject();
-		checkObjectPoints(eventObject);
+		checkObjectPoints(event.getGameObject());
 	}
 
 	@Subscribe
 	public void onDecorativeObjectSpawned(DecorativeObjectSpawned event)
 	{
-		final DecorativeObject eventObject = event.getDecorativeObject();
-		checkObjectPoints(eventObject);
+		checkObjectPoints(event.getDecorativeObject());
 	}
 
 	@Subscribe
 	public void onGameObjectDespawned(GameObjectDespawned event)
 	{
-		objects.remove(event.getGameObject());
+		objects.removeIf(o -> o.getTileObject() == event.getGameObject());
 	}
 
 	@Subscribe
 	public void onDecorativeObjectDespawned(DecorativeObjectDespawned event)
 	{
-		objects.remove(event.getDecorativeObject());
+		objects.removeIf(o -> o.getTileObject() == event.getDecorativeObject());
 	}
 
 	@Subscribe
-	public void onGroundObjectSpawned(GroundObjectSpawned groundObjectSpawned)
+	public void onGroundObjectSpawned(GroundObjectSpawned event)
 	{
-		final GroundObject groundObject = groundObjectSpawned.getGroundObject();
-		checkObjectPoints(groundObject);
+		checkObjectPoints(event.getGroundObject());
 	}
 
 	@Subscribe
-	public void onGroundObjectDespawned(GroundObjectDespawned groundObjectDespawned)
+	public void onGroundObjectDespawned(GroundObjectDespawned event)
 	{
-		GroundObject groundObject = groundObjectDespawned.getGroundObject();
-		objects.remove(groundObject);
+		objects.removeIf(o -> o.getTileObject() == event.getGroundObject());
 	}
 
 	@Subscribe
@@ -257,17 +219,23 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
-		if (!hotKeyPressed || event.getType() != MenuAction.EXAMINE_OBJECT.getId())
+		if (event.getType() != MenuAction.EXAMINE_OBJECT.getId() || !client.isKeyPressed(KeyCode.KC_SHIFT))
 		{
 			return;
 		}
 
 		final Tile tile = client.getScene().getTiles()[client.getPlane()][event.getActionParam0()][event.getActionParam1()];
+		final TileObject tileObject = findTileObject(tile, event.getIdentifier());
+
+		if (tileObject == null)
+		{
+			return;
+		}
 
 		MenuEntry[] menuEntries = client.getMenuEntries();
 		menuEntries = Arrays.copyOf(menuEntries, menuEntries.length + 1);
 		MenuEntry menuEntry = menuEntries[menuEntries.length - 1] = new MenuEntry();
-		menuEntry.setOption(objects.contains(findTileObject(tile, event.getIdentifier())) ? UNMARK : MARK);
+		menuEntry.setOption(objects.stream().anyMatch(o -> o.getTileObject() == tileObject) ? UNMARK : MARK);
 		menuEntry.setTarget(event.getTarget());
 		menuEntry.setParam0(event.getActionParam0());
 		menuEntry.setParam1(event.getActionParam1());
@@ -329,10 +297,11 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 					&& worldPoint.getPlane() == objectPoint.getZ())
 			{
 				// Transform object to get the name which matches against what we've stored
-				if (objectPoint.getName().equals(getObjectComposition(object.getId()).getName()))
+				ObjectComposition composition = getObjectComposition(object.getId());
+				if (composition != null && objectPoint.getName().equals(composition.getName()))
 				{
 					log.debug("Marking object {} due to matching {}", object, objectPoint);
-					objects.add(object);
+					objects.add(new ColorTileObject(object, objectPoint.getColor()));
 					break;
 				}
 			}
@@ -417,17 +386,19 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 	{
 		final WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, object.getLocalLocation());
 		final int regionId = worldPoint.getRegionID();
+		final Color color = config.markerColor();
 		final ObjectPoint point = new ObjectPoint(
 			object.getId(),
 			name,
 			regionId,
 			worldPoint.getRegionX(),
 			worldPoint.getRegionY(),
-			worldPoint.getPlane());
+			worldPoint.getPlane(),
+			color);
 
 		Set<ObjectPoint> objectPoints = points.computeIfAbsent(regionId, k -> new HashSet<>());
 
-		if (objects.remove(object))
+		if (objects.removeIf(o -> o.getTileObject() == object))
 		{
 			// Find the object point that caused this object to be marked, there are two cases:
 			// 1) object is a multiloc, the name may have changed since marking - match from base id
@@ -446,7 +417,7 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 		else
 		{
 			objectPoints.add(point);
-			objects.add(object);
+			objects.add(new ColorTileObject(object, color));
 			log.debug("Marking object: {}", point);
 		}
 
@@ -486,6 +457,7 @@ public class ObjectIndicatorsPlugin extends Plugin implements KeyListener
 			.collect(Collectors.toSet());
 	}
 
+	@Nullable
 	private ObjectComposition getObjectComposition(int id)
 	{
 		ObjectComposition objectComposition = client.getObjectDefinition(id);

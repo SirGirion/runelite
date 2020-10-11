@@ -70,9 +70,9 @@ public class FarmingTracker
 	}
 
 
-	public FarmingTabPanel createTabPanel(Tab tab)
+	public FarmingTabPanel createTabPanel(Tab tab, FarmingContractManager farmingContractManager)
 	{
-		return new FarmingTabPanel(this, itemManager, config, farmingWorld.getTabs().get(tab));
+		return new FarmingTabPanel(this, itemManager, config, farmingWorld.getTabs().get(tab), farmingContractManager);
 	}
 
 	/**
@@ -92,9 +92,13 @@ public class FarmingTracker
 			}
 		}
 
-		FarmingRegion region = farmingWorld.getRegions().get(location.getRegionID());
-		if (region != null && region.isInBounds(location))
+		for (FarmingRegion region : farmingWorld.getRegions().get(location.getRegionID()))
 		{
+			if (!region.isInBounds(location))
+			{
+				continue;
+			}
+
 			// Write config with new varbits
 			// timetracking.<login-username>.<regionID>.<VarbitID>=<varbitValue>:<unix time>
 			String group = TimeTrackingConfig.CONFIG_GROUP + "." + client.getUsername() + "." + region.getRegionID();

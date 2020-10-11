@@ -30,6 +30,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.client.plugins.Plugin;
@@ -49,6 +50,15 @@ public abstract class Overlay implements LayoutableRenderableEntity
 	private OverlayPriority priority = OverlayPriority.NONE;
 	private OverlayLayer layer = OverlayLayer.UNDER_WIDGETS;
 	private final List<OverlayMenuEntry> menuEntries = new ArrayList<>();
+	private boolean resizable;
+	private boolean resettable = true;
+
+	/**
+	 * Whether this overlay can be dragged onto other overlays & have
+	 * other overlays dragged onto it.
+	 */
+	@Setter(AccessLevel.PROTECTED)
+	private boolean dragTargetable;
 
 	protected Overlay()
 	{
@@ -62,10 +72,28 @@ public abstract class Overlay implements LayoutableRenderableEntity
 
 	/**
 	 * Overlay name, used for saving the overlay, needs to be unique
+	 *
 	 * @return overlay name
 	 */
 	public String getName()
 	{
 		return this.getClass().getSimpleName();
+	}
+
+	public void onMouseOver()
+	{
+	}
+
+	/**
+	 * Called when an overlay is dragged onto this, if dragTargetable is true.
+	 * Return true to consume the mouse event and prevent the other
+	 * overlay from being moved
+	 *
+	 * @param other the overlay being dragged
+	 * @return
+	 */
+	public boolean onDrag(Overlay other)
+	{
+		return false;
 	}
 }

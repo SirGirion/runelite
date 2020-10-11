@@ -34,6 +34,14 @@ public enum InventoryID
 	 */
 	FISHING_TRAWLER_REWARD(0),
 	/**
+	 * The trade inventory.
+	 */
+	TRADE(90),
+	/**
+	 * The other trade inventory.
+	 */
+	TRADEOTHER(90 | 0x8000),
+	/**
 	 * Standard player inventory.
 	 */
 	INVENTORY(93),
@@ -57,6 +65,10 @@ public enum InventoryID
 	 * Monkey madness puzzle box inventory.
 	 */
 	MONKEY_MADNESS_PUZZLE_BOX(221),
+	/**
+	 * Drift net fishing reward
+	 */
+	DRIFT_NET_FISHING_REWARD(307),
 	/**
 	 * Kingdom Of Miscellania reward inventory.
 	 */

@@ -57,6 +57,7 @@ import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.QuantityFormatter;
 import net.runelite.client.util.Text;
+import net.runelite.http.api.loottracker.LootRecordType;
 
 class LootTrackerBox extends JPanel
 {
@@ -70,6 +71,7 @@ class LootTrackerBox extends JPanel
 	private final ItemManager itemManager;
 	@Getter(AccessLevel.PACKAGE)
 	private final String id;
+	private final LootRecordType lootRecordType;
 	private final LootTrackerPriceType priceType;
 	private final boolean showPriceType;
 
@@ -84,13 +86,17 @@ class LootTrackerBox extends JPanel
 	LootTrackerBox(
 		final ItemManager itemManager,
 		final String id,
+		final LootRecordType lootRecordType,
 		@Nullable final String subtitle,
 		final boolean hideIgnoredItems,
 		final LootTrackerPriceType priceType,
 		final boolean showPriceType,
-		final BiConsumer<String, Boolean> onItemToggle)
+		final BiConsumer<String, Boolean> onItemToggle,
+		final BiConsumer<String, Boolean> onEventToggle,
+		final boolean eventIgnored)
 	{
 		this.id = id;
+		this.lootRecordType = lootRecordType;
 		this.itemManager = itemManager;
 		this.onItemToggle = onItemToggle;
 		this.hideIgnoredItems = hideIgnoredItems;
@@ -102,7 +108,7 @@ class LootTrackerBox extends JPanel
 
 		logTitle.setLayout(new BoxLayout(logTitle, BoxLayout.X_AXIS));
 		logTitle.setBorder(new EmptyBorder(7, 7, 7, 7));
-		logTitle.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
+		logTitle.setBackground(eventIgnored ? ColorScheme.DARKER_GRAY_HOVER_COLOR : ColorScheme.DARKER_GRAY_COLOR.darker());
 
 		JLabel titleLabel = new JLabel();
 		titleLabel.setText(Text.removeTags(id));
@@ -131,6 +137,15 @@ class LootTrackerBox extends JPanel
 
 		add(logTitle, BorderLayout.NORTH);
 		add(itemContainer, BorderLayout.CENTER);
+
+		// Create popup menu for ignoring the loot event
+		final JPopupMenu popupMenu = new JPopupMenu();
+		popupMenu.setBorder(new EmptyBorder(5, 5, 5, 5));
+		this.setComponentPopupMenu(popupMenu);
+
+		final JMenuItem toggle = new JMenuItem(eventIgnored ? "Include loot" : "Hide loot");
+		toggle.addActionListener(e -> onEventToggle.accept(id, !eventIgnored));
+		popupMenu.add(toggle);
 	}
 
 	/**
@@ -151,23 +166,24 @@ class LootTrackerBox extends JPanel
 	 */
 	boolean matches(final LootTrackerRecord record)
 	{
-		return record.getTitle().equals(id);
+		return record.getTitle().equals(id) && record.getType() == lootRecordType;
 	}
 
 	/**
-	 * Checks if this box matches specified id
+	 * Checks if this box matches specified id and type
 	 *
 	 * @param id other record id
+	 * @param type other record type
 	 * @return true if match is made
 	 */
-	boolean matches(final String id)
+	boolean matches(final String id, final LootRecordType type)
 	{
 		if (id == null)
 		{
 			return true;
 		}
 
-		return this.id.equals(id);
+		return this.id.equals(id) && lootRecordType == type;
 	}
 
 	/**
@@ -185,18 +201,22 @@ class LootTrackerBox extends JPanel
 		outer:
 		for (LootTrackerItem item : record.getItems())
 		{
+			final int mappedItemId = LootTrackerMapping.map(item.getId(), item.getName());
 			// Combine it into an existing item if one already exists
 			for (int idx = 0; idx < items.size(); ++idx)
 			{
 				LootTrackerItem i = items.get(idx);
-				if (item.getId() == i.getId())
+				if (mappedItemId == i.getId())
 				{
 					items.set(idx, new LootTrackerItem(i.getId(), i.getName(), i.getQuantity() + item.getQuantity(), i.getGePrice(), i.getHaPrice(), i.isIgnored()));
 					continue outer;
 				}
 			}
 
-			items.add(item);
+			final LootTrackerItem mappedItem = mappedItemId == item.getId()
+				? item // reuse existing item
+				: new LootTrackerItem(mappedItemId, item.getName(), item.getQuantity(), item.getGePrice(), item.getHaPrice(), item.isIgnored());
+			items.add(mappedItem);
 		}
 	}
 
@@ -217,6 +237,7 @@ class LootTrackerBox extends JPanel
 		if (kills > 1)
 		{
 			subTitleLabel.setText("x " + kills);
+			subTitleLabel.setToolTipText(QuantityFormatter.formatNumber(totalPrice / kills) + " gp (average)");
 		}
 
 		validate();

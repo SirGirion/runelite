@@ -24,6 +24,7 @@
  */
 package net.runelite.client.plugins.config;
 
+import com.google.common.collect.ImmutableList;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -74,10 +75,19 @@ class PluginListPanel extends PluginPanel
 {
 	private static final String RUNELITE_GROUP_NAME = RuneLiteConfig.class.getAnnotation(ConfigGroup.class).value();
 	private static final String PINNED_PLUGINS_CONFIG_KEY = "pinnedPlugins";
+	private static final ImmutableList<String> CATEGORY_TAGS = ImmutableList.of(
+		"Combat",
+		"Chat",
+		"Item",
+		"Minigame",
+		"Notification",
+		"Plugin Hub",
+		"Skilling",
+		"XP"
+	);
 
 	private final ConfigManager configManager;
 	private final PluginManager pluginManager;
-	private final ScheduledExecutorService executorService;
 	private final Provider<ConfigPanel> configPanelProvider;
 	private final List<PluginConfigurationDescriptor> fakePlugins = new ArrayList<>();
 
@@ -107,7 +117,6 @@ class PluginListPanel extends PluginPanel
 		this.configManager = configManager;
 		this.pluginManager = pluginManager;
 		this.externalPluginManager = externalPluginManager;
-		this.executorService = executorService;
 		this.configPanelProvider = configPanelProvider;
 
 		muxer = new MultiplexingPluginPanel(this)
@@ -150,6 +159,7 @@ class PluginListPanel extends PluginPanel
 				onSearchBarChanged();
 			}
 		});
+		CATEGORY_TAGS.forEach(searchBar.getSuggestionListModel()::addElement);
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -203,14 +213,16 @@ class PluginListPanel extends PluginPanel
 						config,
 						configDescriptor);
 				})
-		).map(desc ->
-		{
-			PluginListItem listItem = new PluginListItem(this, desc);
-			listItem.setPinned(pinnedPlugins.contains(desc.getName()));
-			return listItem;
-		}).collect(Collectors.toList());
+		)
+			.map(desc ->
+			{
+				PluginListItem listItem = new PluginListItem(this, desc);
+				listItem.setPinned(pinnedPlugins.contains(desc.getName()));
+				return listItem;
+			})
+			.sorted(Comparator.comparing(p -> p.getPluginConfig().getName()))
+			.collect(Collectors.toList());
 
-		pluginList.sort(Comparator.comparing(p -> p.getPluginConfig().getName()));
 		mainPanel.removeAll();
 		refresh();
 	}
@@ -251,31 +263,9 @@ class PluginListPanel extends PluginPanel
 	private void onSearchBarChanged()
 	{
 		final String text = searchBar.getText();
-
 		pluginList.forEach(mainPanel::remove);
-
-		showMatchingPlugins(true, text);
-		showMatchingPlugins(false, text);
-
+		PluginSearch.search(pluginList, text).forEach(mainPanel::add);
 		revalidate();
-	}
-
-	private void showMatchingPlugins(boolean pinned, String text)
-	{
-		if (text.isEmpty())
-		{
-			pluginList.stream().filter(item -> pinned == item.isPinned()).forEach(mainPanel::add);
-			return;
-		}
-
-		final String[] searchTerms = text.toLowerCase().split(" ");
-		pluginList.forEach(listItem ->
-		{
-			if (pinned == listItem.isPinned() && listItem.matchesSearchTerms(searchTerms))
-			{
-				mainPanel.add(listItem);
-			}
-		});
 	}
 
 	void openConfigurationPanel(String configGroup)
@@ -311,36 +301,30 @@ class PluginListPanel extends PluginPanel
 
 	void startPlugin(Plugin plugin)
 	{
-		executorService.submit(() ->
-		{
-			pluginManager.setPluginEnabled(plugin, true);
+		pluginManager.setPluginEnabled(plugin, true);
 
-			try
-			{
-				pluginManager.startPlugin(plugin);
-			}
-			catch (PluginInstantiationException ex)
-			{
-				log.warn("Error when starting plugin {}", plugin.getClass().getSimpleName(), ex);
-			}
-		});
+		try
+		{
+			pluginManager.startPlugin(plugin);
+		}
+		catch (PluginInstantiationException ex)
+		{
+			log.warn("Error when starting plugin {}", plugin.getClass().getSimpleName(), ex);
+		}
 	}
 
 	void stopPlugin(Plugin plugin)
 	{
-		executorService.submit(() ->
-		{
-			pluginManager.setPluginEnabled(plugin, false);
+		pluginManager.setPluginEnabled(plugin, false);
 
-			try
-			{
-				pluginManager.stopPlugin(plugin);
-			}
-			catch (PluginInstantiationException ex)
-			{
-				log.warn("Error when stopping plugin {}", plugin.getClass().getSimpleName(), ex);
-			}
-		});
+		try
+		{
+			pluginManager.stopPlugin(plugin);
+		}
+		catch (PluginInstantiationException ex)
+		{
+			log.warn("Error when stopping plugin {}", plugin.getClass().getSimpleName(), ex);
+		}
 	}
 
 	private List<String> getPinnedPluginNames()
