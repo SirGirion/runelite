@@ -86,15 +86,27 @@ public class MotherlodeGemOverlay extends OverlayPanel
 		if (config.showLootIcons())
 		{
 			panelComponent.setOrientation(ComponentOrientation.HORIZONTAL);
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_DIAMOND, diamondsFound, true)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_RUBY, rubiesFound, true)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_EMERALD, emeraldsFound, true)));
-			panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_SAPPHIRE, sapphiresFound, true)));
+			if (diamondsFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_DIAMOND, diamondsFound, true)));
+			}
+			if (rubiesFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_RUBY, rubiesFound, true)));
+			}
+			if (emeraldsFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_EMERALD, emeraldsFound, true)));
+			}
+			if (sapphiresFound > 0)
+			{
+				panelComponent.getChildren().add(new ImageComponent(itemManager.getImage(ItemID.UNCUT_SAPPHIRE, sapphiresFound, true)));
+			}
 		}
 		else
 		{
-			panelComponent.getChildren().add(TitleComponent.builder().text("Gems found").build());
 			panelComponent.setOrientation(ComponentOrientation.VERTICAL);
+			panelComponent.getChildren().add(TitleComponent.builder().text("Gems found").build());
 			if (diamondsFound > 0)
 			{
 				panelComponent.getChildren().add(LineComponent.builder()
