@@ -27,12 +27,10 @@ package net.runelite.client.plugins.timetracking.farming;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.timetracking.Tab;
 
 @RequiredArgsConstructor
 @Getter
-@Slf4j
 public enum PatchImplementation
 {
 	BELLADONNA(Tab.SPECIAL, "")
@@ -2614,7 +2612,7 @@ public enum PatchImplementation
 				if (value == 0)
 				{
 					// Compost bin[Examine] 7808
-					return new PatchState(Produce.COMPOST_BIN, CropState.EMPTY, 0);
+					return new PatchState(Produce.EMPTY_COMPOST_BIN, CropState.EMPTY, 0);
 				}
 				if (value >= 1 && value <= 15)
 				{
@@ -2656,6 +2654,21 @@ public enum PatchImplementation
 					// Compost bin[Open,Examine,Dump] 19082
 					return new PatchState(Produce.SUPERCOMPOST, CropState.GROWING, Produce.SUPERCOMPOST.getStages() - 1);
 				}
+				if (value >= 129 && value <= 143)
+				{
+					// Giant compost bin[Close,Examine,Dump] 19098..19111,20099
+					return new PatchState(Produce.ROTTEN_TOMATO, CropState.FILLING, value - 129);
+				}
+				if (value >= 144 && value <= 158)
+				{
+					// Giant compost bin[Take,Examine,Dump] 20102..20116
+					return new PatchState(Produce.ROTTEN_TOMATO, CropState.HARVESTABLE, value - 144);
+				}
+				if (value >= 159 && value <= 160)
+				{
+					// Giant compost bin[Open,Examine,Dump] 20100
+					return new PatchState(Produce.ROTTEN_TOMATO, CropState.GROWING, value - 159);
+				}
 				if (value >= 176 && value <= 190)
 				{
 					// Compost bin[Take,Examine,Dump] 30502,30503,30504,30505,30506,30507,30508,30509,30510,30511,30512,30513,30514,30515,30516
@@ -2672,7 +2685,7 @@ public enum PatchImplementation
 				if (value == 0)
 				{
 					// Big compost bin[Examine] 33762
-					return new PatchState(Produce.GIANT_COMPOST_BIN, CropState.EMPTY, 0);
+					return new PatchState(Produce.EMPTY_GIANT_COMPOST_BIN, CropState.EMPTY, 0);
 				}
 				if (value >= 1 && value <= 15)
 				{
@@ -2711,7 +2724,7 @@ public enum PatchImplementation
 				}
 				if (value >= 97 && value <= 99)
 				{
-					// Giant compost bin[Open] 33855,33855
+					// Giant compost bin[Open,Examin,Dump] 33855,33855
 					return new PatchState(Produce.GIANT_SUPERCOMPOST, CropState.GROWING, value - 97); // Once closed, starts rotting (super compost)
 				}
 				if (value >= 100 && value <= 114)
@@ -2724,6 +2737,21 @@ public enum PatchImplementation
 					// Giant compost bin[Open,Examine,Dump] 33793,33793
 					return new PatchState(Produce.GIANT_COMPOST, CropState.GROWING, value - 127);
 				}
+				if (value >= 129 && value <= 143)
+				{
+					// Giant compost bin[Close,Examine,Dump] 33887..33901
+					return new PatchState(Produce.GIANT_ROTTEN_TOMATO, CropState.FILLING, value - 129);
+				}
+				if (value >= 144 && value <= 158)
+				{
+					// Giant compost bin[Take,Examine,Dump] 33919..33933
+					return new PatchState(Produce.GIANT_ROTTEN_TOMATO, CropState.HARVESTABLE, value - 144);
+				}
+				if (value >= 159 && value <= 160)
+				{
+					// Giant compost bin[Open,Examine,Dump] 33917,33917
+					return new PatchState(Produce.GIANT_ROTTEN_TOMATO, CropState.GROWING, value - 159);
+				}
 				if (value >= 161 && value <= 175)
 				{
 					// Giant compost bin[Examine,Dump] 33840..33854
@@ -2732,6 +2760,21 @@ public enum PatchImplementation
 				if (value >= 176 && value <= 205)
 				{
 					return new PatchState(Produce.GIANT_ULTRACOMPOST, CropState.HARVESTABLE, value - 176);
+				}
+				if (value >= 207 && value <= 221)
+				{
+					// Giant compost bin[Take,Examine,Dump] 33934..33948
+					return new PatchState(Produce.GIANT_ROTTEN_TOMATO, CropState.HARVESTABLE, 15 + value - 207);
+				}
+				if (value == 222)
+				{
+					// Giant compost bin[Open,Examine,Dump] 33918
+					return new PatchState(Produce.GIANT_ROTTEN_TOMATO, CropState.GROWING, Produce.GIANT_ROTTEN_TOMATO.getStages() - 1);
+				}
+				if (value >= 223 && value <= 237)
+				{
+					// Giant compost bin[Close,Examine,Dump] 33902..33916
+					return new PatchState(Produce.GIANT_ROTTEN_TOMATO, CropState.FILLING, 15 + value  - 223);
 				}
 				return null;
 			}
