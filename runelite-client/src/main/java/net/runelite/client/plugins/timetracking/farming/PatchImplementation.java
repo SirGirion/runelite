@@ -2759,6 +2759,7 @@ public enum PatchImplementation
 				}
 				if (value >= 176 && value <= 205)
 				{
+					// Giant compost bin[Take,Examine,Dump] 33957..33986
 					return new PatchState(Produce.GIANT_ULTRACOMPOST, CropState.HARVESTABLE, value - 176);
 				}
 				if (value >= 207 && value <= 221)
