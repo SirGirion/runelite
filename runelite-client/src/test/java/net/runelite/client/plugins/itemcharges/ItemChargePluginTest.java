@@ -75,7 +75,6 @@ public class ItemChargePluginTest
 	private static final String BREAK_AMULET_OF_CHEMISTRY_3_DOSES = "Your amulet of chemistry helps you create a 3-dose potion. It then crumbles to dust.";
 	private static final String BREAK_AMULET_OF_CHEMISTRY_2_DOSES = "Your amulet of chemistry helps you create a 2-dose potion. It then crumbles to dust.";
 
-<<<<<<< HEAD
 	private static final String BRACLET_SLAUGHTER = "Your bracelet of slaughter prevents your slayer count from decreasing. It has 9 charges left.";
 	private static final String BRACLET_EXPEDITIOUS = "Your expeditious bracelet helps you progress your slayer task faster. It has 9 charges left.";
 
@@ -90,7 +89,7 @@ public class ItemChargePluginTest
 
 	private static final String CHAT_BRACELET_SLAUGHTER_CHARGE_ONE = "Your bracelet of slaughter has 1 charge left.";
 	private static final String CHAT_BRACELET_EXPEDITIOUS_CHARGE_ONE = "Your expeditious bracelet has 1 charge left.";
-=======
+
 	private static final String CHRONICLE_CHECK_CHARGES_FULL = "Your book has 1000 charges left.";
 	private static final String CHRONICLE_CHECK_CHARGES_ONE = "You have one charge left in your book.";
 	private static final String CHRONICLE_CHECK_CHARGES_EMPTY = "Your book has run out of charges.";
@@ -102,7 +101,6 @@ public class ItemChargePluginTest
 	private static final String CHRONICLE_ADD_SINGLE_CHARGE_FULL = "You add a single charge to your book. It now has 1000 charges.";
 	private static final String CHRONICLE_ADD_MULTIPLE_CHARGES = "You add 5 charges to your book. It now has 5 charges.";
 	private static final String CHRONICLE_ADD_FULL = "Your book is fully charged! It has 1,000 charges already.";
->>>>>>> master
 
 	@Mock
 	@Bind
@@ -229,85 +227,7 @@ public class ItemChargePluginTest
 		itemChargePlugin.onChatMessage(chatMessage);
 		verify(config).amuletOfChemistry(5);
 		reset(config);
-	}
 
-	@Test
-	public void testBraceletSlaughter()
-	{
-		ChatMessage chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_SLAUGHTER, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).braceletOfSlaughter(eq(9));
-		reset(config);
-
-		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", CHAT_BRACELET_SLAUGHTER_CHARGE, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).braceletOfSlaughter(eq(12));
-		reset(config);
-
-		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", CHAT_BRACELET_SLAUGHTER_CHARGE_ONE, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).braceletOfSlaughter(eq(1));
-		reset(config);
-
-		config.braceletOfSlaughter(1);
-		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_SLAUGHTER_V3, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).braceletOfSlaughter(eq(30));
-		reset(config);
-
-		Widget braceletBreakWidget = mock(Widget.class);
-		when(braceletBreakWidget.getItemId()).thenReturn(ItemID.BRACELET_OF_SLAUGHTER);
-		when(client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE)).thenReturn(braceletBreakWidget);
-		config.braceletOfSlaughter(-1);
-		itemChargePlugin.lastCheckTick = -1;
-		itemChargePlugin.onGameTick(new GameTick());
-		verify(config).braceletOfSlaughter(eq(30));
-		reset(config);
-
-<<<<<<< HEAD
-		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_SLAUGHTER_V2, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).braceletOfSlaughter(eq(1));
-		reset(config);
-	}
-
-	@Test
-	public void testBraceletExpeditious()
-	{
-		ChatMessage chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_EXPEDITIOUS, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).expeditiousBracelet(eq(9));
-		reset(config);
-
-		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", CHAT_BRACELET_EXPEDITIOUS_CHARGE, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).expeditiousBracelet(eq(12));
-		reset(config);
-
-		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", CHAT_BRACELET_EXPEDITIOUS_CHARGE_ONE, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).expeditiousBracelet(eq(1));
-		reset(config);
-
-		config.expeditiousBracelet(1);
-		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_EXPEDITIOUS_V3, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).expeditiousBracelet(eq(30));
-		reset(config);
-
-		Widget braceletBreakWidget = mock(Widget.class);
-		when(braceletBreakWidget.getItemId()).thenReturn(ItemID.EXPEDITIOUS_BRACELET);
-		when(client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE)).thenReturn(braceletBreakWidget);
-		config.expeditiousBracelet(-1);
-		itemChargePlugin.lastCheckTick = -1;
-		itemChargePlugin.onGameTick(new GameTick());
-		verify(config).expeditiousBracelet(eq(30));
-		reset(config);
-
-		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_EXPEDITIOUS_V2, null, 0);
-		itemChargePlugin.onChatMessage(chatMessageEvent);
-		verify(config).expeditiousBracelet(eq(1));
-=======
 		chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", CHRONICLE_CHECK_CHARGES_FULL, "", 0);
 		itemChargePlugin.onChatMessage(chatMessage);
 		verify(config).chronicle(1000);
@@ -361,7 +281,83 @@ public class ItemChargePluginTest
 		chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", CHRONICLE_ADD_FULL, "", 0);
 		itemChargePlugin.onChatMessage(chatMessage);
 		verify(config).chronicle(1000);
->>>>>>> master
 		reset(config);
+	}
+
+	@Test
+	public void testBraceletSlaughter()
+	{
+		ChatMessage chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_SLAUGHTER, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).braceletOfSlaughter(9);
+		reset(config);
+
+		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", CHAT_BRACELET_SLAUGHTER_CHARGE, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).braceletOfSlaughter(12);
+		reset(config);
+
+		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", CHAT_BRACELET_SLAUGHTER_CHARGE_ONE, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).braceletOfSlaughter(1);
+		reset(config);
+
+		config.braceletOfSlaughter(1);
+		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_SLAUGHTER_V3, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).braceletOfSlaughter(30);
+		reset(config);
+
+		Widget braceletBreakWidget = mock(Widget.class);
+		when(braceletBreakWidget.getItemId()).thenReturn(ItemID.BRACELET_OF_SLAUGHTER);
+		when(client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE)).thenReturn(braceletBreakWidget);
+		config.braceletOfSlaughter(-1);
+		itemChargePlugin.lastCheckTick = -1;
+		itemChargePlugin.onGameTick(new GameTick());
+		verify(config).braceletOfSlaughter(30);
+		reset(config);
+
+		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_SLAUGHTER_V2, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).braceletOfSlaughter(1);
+		reset(config);
+	}
+
+	@Test
+	public void testBraceletExpeditious()
+	{
+		ChatMessage chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_EXPEDITIOUS, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).expeditiousBracelet(9);
+		reset(config);
+
+		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", CHAT_BRACELET_EXPEDITIOUS_CHARGE, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).expeditiousBracelet(12);
+		reset(config);
+
+		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", CHAT_BRACELET_EXPEDITIOUS_CHARGE_ONE, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).expeditiousBracelet(1);
+		reset(config);
+
+		config.expeditiousBracelet(1);
+		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_EXPEDITIOUS_V3, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).expeditiousBracelet(30);
+		reset(config);
+
+		Widget braceletBreakWidget = mock(Widget.class);
+		when(braceletBreakWidget.getItemId()).thenReturn(ItemID.EXPEDITIOUS_BRACELET);
+		when(client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE)).thenReturn(braceletBreakWidget);
+		config.expeditiousBracelet(-1);
+		itemChargePlugin.lastCheckTick = -1;
+		itemChargePlugin.onGameTick(new GameTick());
+		verify(config).expeditiousBracelet(30);
+		reset(config);
+
+		chatMessageEvent = new ChatMessage(null, GAMEMESSAGE, "", BRACLET_EXPEDITIOUS_V2, null, 0);
+		itemChargePlugin.onChatMessage(chatMessageEvent);
+		verify(config).expeditiousBracelet(1);
 	}
 }
