@@ -154,7 +154,6 @@ public interface ItemStatConfig extends Config
 		return new Color(0x9CEE33);
 	}
 
-
 	@ConfigItem(
 		keyName = "colorBetterCapped",
 		name = "Better (Capped)",

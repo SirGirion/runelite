@@ -127,6 +127,7 @@ public class ChatCommandsPlugin extends Plugin
 	private static final String GC_COMMAND_STRING = "!gc";
 	private static final String DUEL_ARENA_COMMAND = "!duels";
 	private static final String LEAGUE_POINTS_COMMAND = "!lp";
+	private static final String SOUL_WARS_ZEAL_COMMAND = "!sw";
 
 	@VisibleForTesting
 	static final int ADV_LOG_EXPLOITS_TEXT_INDEX = 1;
@@ -137,6 +138,7 @@ public class ChatCommandsPlugin extends Plugin
 	private String pohOwner;
 	private HiscoreEndpoint hiscoreEndpoint; // hiscore endpoint for current player
 	private String lastBossKill;
+	private int lastBossTime = -1;
 	private int lastPb = -1;
 
 	@Inject
@@ -191,12 +193,14 @@ public class ChatCommandsPlugin extends Plugin
 		chatCommandManager.registerCommandAsync(PB_COMMAND, this::personalBestLookup, this::personalBestSubmit);
 		chatCommandManager.registerCommandAsync(GC_COMMAND_STRING, this::gambleCountLookup, this::gambleCountSubmit);
 		chatCommandManager.registerCommandAsync(DUEL_ARENA_COMMAND, this::duelArenaLookup, this::duelArenaSubmit);
+		chatCommandManager.registerCommandAsync(SOUL_WARS_ZEAL_COMMAND, this::soulWarsZealLookup);
 	}
 
 	@Override
 	public void shutDown()
 	{
 		lastBossKill = null;
+		lastBossTime = -1;
 
 		keyManager.unregisterKeyListener(chatKeyboardListener);
 
@@ -214,6 +218,7 @@ public class ChatCommandsPlugin extends Plugin
 		chatCommandManager.unregisterCommand(PB_COMMAND);
 		chatCommandManager.unregisterCommand(GC_COMMAND_STRING);
 		chatCommandManager.unregisterCommand(DUEL_ARENA_COMMAND);
+		chatCommandManager.unregisterCommand(SOUL_WARS_ZEAL_COMMAND);
 	}
 
 	@Provides
@@ -230,27 +235,23 @@ public class ChatCommandsPlugin extends Plugin
 
 	private void setKc(String boss, int killcount)
 	{
-		configManager.setConfiguration("killcount." + client.getUsername().toLowerCase(),
-			boss.toLowerCase(), killcount);
+		configManager.setRSProfileConfiguration("killcount", boss.toLowerCase(), killcount);
 	}
 
 	private int getKc(String boss)
 	{
-		Integer killCount = configManager.getConfiguration("killcount." + client.getUsername().toLowerCase(),
-			boss.toLowerCase(), int.class);
+		Integer killCount = configManager.getRSProfileConfiguration("killcount", boss.toLowerCase(), int.class);
 		return killCount == null ? 0 : killCount;
 	}
 
 	private void setPb(String boss, int seconds)
 	{
-		configManager.setConfiguration("personalbest." + client.getUsername().toLowerCase(),
-			boss.toLowerCase(), seconds);
+		configManager.setRSProfileConfiguration("personalbest", boss.toLowerCase(), seconds);
 	}
 
 	private int getPb(String boss)
 	{
-		Integer personalBest = configManager.getConfiguration("personalbest." + client.getUsername().toLowerCase(),
-			boss.toLowerCase(), int.class);
+		Integer personalBest = configManager.getRSProfileConfiguration("personalbest", boss.toLowerCase(), int.class);
 		return personalBest == null ? 0 : personalBest;
 	}
 
@@ -283,6 +284,7 @@ public class ChatCommandsPlugin extends Plugin
 			else
 			{
 				lastBossKill = boss;
+				lastBossTime = client.getTickCount();
 			}
 			return;
 		}
@@ -304,16 +306,11 @@ public class ChatCommandsPlugin extends Plugin
 			setKc(boss, kc);
 			if (lastPb > -1)
 			{
-				// lastPb contains the last raid duration and not the personal best, because the raid
-				// complete message does not include the pb. We have to check if it is a new pb:
-				int currentPb = getPb(boss);
-				if (currentPb <= 0 || lastPb < currentPb)
-				{
-					setPb(boss, lastPb);
-				}
+				setPb(boss, lastPb);
 				lastPb = -1;
 			}
 			lastBossKill = boss;
+			lastBossTime = client.getTickCount();
 			return;
 		}
 
@@ -432,7 +429,11 @@ public class ChatCommandsPlugin extends Plugin
 			setKc("Hallowed Sepulchre", kc);
 		}
 
-		lastBossKill = null;
+		if (lastBossKill != null && lastBossTime != client.getTickCount())
+		{
+			lastBossKill = null;
+			lastBossTime = -1;
+		}
 	}
 
 	private static int timeStringToSeconds(String timeString)
@@ -1261,6 +1262,16 @@ public class ChatCommandsPlugin extends Plugin
 		minigameLookup(chatMessage, HiscoreSkill.LAST_MAN_STANDING);
 	}
 
+	private void soulWarsZealLookup(ChatMessage chatMessage, String message)
+	{
+		if (!config.sw())
+		{
+			return;
+		}
+
+		minigameLookup(chatMessage, HiscoreSkill.SOUL_WARS_ZEAL);
+	}
+
 	private void minigameLookup(ChatMessage chatMessage, HiscoreSkill minigame)
 	{
 		try
@@ -1294,6 +1305,9 @@ public class ChatCommandsPlugin extends Plugin
 					break;
 				case LEAGUE_POINTS:
 					hiscoreSkill = result.getLeaguePoints();
+					break;
+				case SOUL_WARS_ZEAL:
+					hiscoreSkill = result.getSoulWarsZeal();
 					break;
 				default:
 					log.warn("error looking up {} score: not implemented", minigame.getName().toLowerCase());
