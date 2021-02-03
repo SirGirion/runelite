@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Abex
+ * Copyright (c) 2021 Abex
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,62 +22,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.config;
+package net.runelite.http.api.gson;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.JButton;
-import lombok.Getter;
-import net.runelite.client.config.Keybind;
-import net.runelite.client.config.ModifierlessKeybind;
-import net.runelite.client.ui.FontManager;
+import java.time.Instant;
+import net.runelite.http.api.RuneLiteAPI;
+import org.junit.Assert;
+import org.junit.Test;
 
-class HotkeyButton extends JButton
+public class InstantTypeAdapterTest
 {
-	@Getter
-	private Keybind value;
-
-	public HotkeyButton(Keybind value, boolean modifierless)
+	@Test
+	public void test()
 	{
-		setFont(FontManager.getDefaultFont().deriveFont(12.f));
-		setValue(value);
-		addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mouseReleased(MouseEvent e)
-			{
-				// We have to use a mouse adapter instead of an action listener so the press action key (space) can be bound
-				setValue(Keybind.NOT_SET);
-			}
-		});
-
-		addKeyListener(new KeyAdapter()
-		{
-			@Override
-			public void keyPressed(KeyEvent e)
-			{
-				if (modifierless)
-				{
-					setValue(new ModifierlessKeybind(e));
-				}
-				else
-				{
-					setValue(new Keybind(e));
-				}
-			}
-		});
+		test("null", null);
+		test("{\"seconds\":1609538310,\"nanos\":291698903}", Instant.ofEpochSecond(1609538310, 291698903));
 	}
 
-	public void setValue(Keybind value)
+	private void test(String json, Instant object)
 	{
-		if (value == null)
-		{
-			value = Keybind.NOT_SET;
-		}
-
-		this.value = value;
-		setText(value.toString());
+		Instant parsed = RuneLiteAPI.GSON.fromJson(json, Instant.class);
+		Assert.assertEquals(object, parsed);
+		String serialized = RuneLiteAPI.GSON.toJson(object);
+		Instant roundTripped = RuneLiteAPI.GSON.fromJson(serialized, Instant.class);
+		Assert.assertEquals(object, roundTripped);
 	}
 }
