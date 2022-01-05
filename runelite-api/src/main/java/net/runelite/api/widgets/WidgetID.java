@@ -901,7 +901,7 @@ public final class WidgetID
 
 	static class GauntletTimer
 	{
-		static final int CONTAINER = 2;
+		static final int CONTAINER = 4;
 	}
 
 	static class HallowedSepulchreTimer

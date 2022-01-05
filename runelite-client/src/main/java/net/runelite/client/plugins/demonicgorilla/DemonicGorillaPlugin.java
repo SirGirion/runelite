@@ -549,9 +549,7 @@ public class DemonicGorillaPlugin extends Plugin
 		{
 			recentBoulders.add(WorldPoint.fromLocal(client, event.getPosition()));
 		}
-		else if (projectileId == ProjectileID.DEMONIC_GORILLA_MAGIC ||
-			projectileId == ProjectileID.DEMONIC_GORILLA_RANGED)
-		{
+		else {
 			WorldPoint projectileSourcePosition = WorldPoint.fromLocal(
 				client, projectile.getX1(), projectile.getY1(), client.getPlane());
 			for (DemonicGorilla gorilla : gorillas.values())

@@ -206,6 +206,7 @@ public class GauntletPlugin extends Plugin
 
 		if (inBossFight())
 		{
+			System.out.println("in boss fight");
 			hunllef.countTick();
 		}
 	}
