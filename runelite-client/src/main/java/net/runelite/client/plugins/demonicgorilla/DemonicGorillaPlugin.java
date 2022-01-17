@@ -42,7 +42,6 @@ import net.runelite.api.NPC;
 import net.runelite.api.NpcID;
 import net.runelite.api.Player;
 import net.runelite.api.Projectile;
-import net.runelite.api.ProjectileID;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
@@ -86,6 +85,10 @@ public class DemonicGorillaPlugin extends Plugin
 	private List<PendingGorillaAttack> pendingAttacks;
 
 	private Map<Player, MemorizedPlayer> memorizedPlayers;
+
+	private static final int DEMONIC_GORILLA_RANGED = 1302;
+	private static final int DEMONIC_GORILLA_MAGIC = 1304;
+	private static final int DEMONIC_GORILLA_BOULDER = 856;
 
 	@Override
 	protected void startUp() throws Exception
@@ -362,11 +365,11 @@ public class DemonicGorillaPlugin extends Plugin
 							// priority over normal attack animations.
 
 							int projectileId = gorilla.getRecentProjectileId();
-							if (projectileId == ProjectileID.DEMONIC_GORILLA_MAGIC)
+							if (projectileId == DEMONIC_GORILLA_MAGIC)
 							{
 								onGorillaAttack(gorilla, DemonicGorilla.AttackStyle.MAGIC);
 							}
-							else if (projectileId == ProjectileID.DEMONIC_GORILLA_RANGED)
+							else if (projectileId == DEMONIC_GORILLA_RANGED)
 							{
 								onGorillaAttack(gorilla, DemonicGorilla.AttackStyle.RANGED);
 							}
@@ -531,21 +534,21 @@ public class DemonicGorillaPlugin extends Plugin
 	{
 		Projectile projectile = event.getProjectile();
 		int projectileId = projectile.getId();
-		if (projectileId != ProjectileID.DEMONIC_GORILLA_RANGED &&
-			projectileId != ProjectileID.DEMONIC_GORILLA_MAGIC &&
-			projectileId != ProjectileID.DEMONIC_GORILLA_BOULDER)
+		/*if (projectileId != DEMONIC_GORILLA_RANGED &&
+			projectileId != DEMONIC_GORILLA_MAGIC &&
+			projectileId != DEMONIC_GORILLA_BOULDER)
 		{
 			return;
-		}
+		}*/
 
 		// The event fires once before the projectile starts moving,
 		// and we only want to check each projectile once
-		if (client.getGameCycle() >= projectile.getStartMovementCycle())
+		if (client.getGameCycle() >= projectile.getStartCycle())
 		{
 			return;
 		}
 
-		if (projectileId == ProjectileID.DEMONIC_GORILLA_BOULDER)
+		if (projectileId == DEMONIC_GORILLA_BOULDER)
 		{
 			recentBoulders.add(WorldPoint.fromLocal(client, event.getPosition()));
 		}
