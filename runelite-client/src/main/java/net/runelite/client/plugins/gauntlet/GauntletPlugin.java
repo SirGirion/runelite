@@ -109,6 +109,8 @@ public class GauntletPlugin extends Plugin
 	@Getter(AccessLevel.PACKAGE)
 	private final Map<TileObject, BufferedImage> resources = new HashMap<>();
 
+	private static final int IN_GAUNTLET = 9178;
+
 	@Provides
 	GauntletConfig provideConfig(ConfigManager configManager)
 	{
@@ -180,7 +182,7 @@ public class GauntletPlugin extends Plugin
 	@Subscribe
 	public void onVarbitChanged(final VarbitChanged event)
 	{
-		final int inGame = client.getVar(Varbits.IN_GAUNTLET);
+		final int inGame = client.getVar(IN_GAUNTLET);
 
 		if (inGame != inGameBit && inGame == 1)
 		{
