@@ -637,7 +637,7 @@ class LootTrackerPanel extends PluginPanel
 		final JMenuItem copyToClipboard = new JMenuItem("Copy to clipboard");
 		copyToClipboard.addActionListener(e ->
 		{
-			final BufferedImage panelImage = new BufferedImage(box.getWidth(), box.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			final BufferedImage panelImage = new BufferedImage(box.getWidth(), box.getHeight(), BufferedImage.TYPE_INT_RGB);
 			final Graphics panelGraphics = panelImage.createGraphics();
 			box.paint(panelGraphics);
 			panelGraphics.dispose();
