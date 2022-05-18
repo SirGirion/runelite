@@ -45,9 +45,14 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
+import net.runelite.api.VarClientInt;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
+<<<<<<< HEAD
+=======
+import net.runelite.api.events.GameTick;
+>>>>>>> b45b294c0 (itemcharges: track ardy cloak charges left)
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.VarbitChanged;
@@ -145,6 +150,8 @@ public class ItemChargePlugin extends Plugin
 	private static final Pattern BRACELET_OF_CLAY_CHECK_PATTERN = Pattern.compile(
 		"You can mine (\\d{1,2}) more pieces? of soft clay before your bracelet crumbles to dust\\."
 	);
+	private static final Pattern ARDY_CLOAK_ACTIVATE_PATTERN = Pattern.compile("You have used (\\d) of your (\\d) Ardougne Farm teleports for today.");
+	private static final String ARDY_CLOAK_NO_CHARGES_TEXT = "You have already used all of your available teleports for today. Try again tomorrow when the cape has recharged.";
 
 	private static final int MAX_DODGY_CHARGES = 10;
 	private static final int MAX_BINDING_CHARGES = 16;
@@ -155,6 +162,7 @@ public class ItemChargePlugin extends Plugin
 	private static final int MAX_SLAYER_BRACELET_CHARGES = 30;
 	private static final int MAX_BLOOD_ESSENCE_CHARGES = 1000;
 	private static final int MAX_BRACELET_OF_CLAY_CHARGES = 28;
+	private static final int ONE_DAY = 86400000;
 
 	@Inject
 	private Client client;
@@ -187,6 +195,9 @@ public class ItemChargePlugin extends Plugin
 	private int lastCheckTick;
 	private final Map<EquipmentInventorySlot, ItemChargeInfobox> infoboxes = new EnumMap<>(EquipmentInventorySlot.class);
 
+	private long lastReset;
+	private boolean loggingIn;
+
 	@Provides
 	ItemChargeConfig getConfig(ConfigManager configManager)
 	{
@@ -217,6 +228,7 @@ public class ItemChargePlugin extends Plugin
 		if (e.getGameState() == GameState.LOGGING_IN)
 		{
 			updateExplorerRingCharges(0);
+			loggingIn = true;
 		}
 	}
 
@@ -257,6 +269,7 @@ public class ItemChargePlugin extends Plugin
 			Matcher bloodEssenceCheckMatcher = BLOOD_ESSENCE_CHECK_PATTERN.matcher(message);
 			Matcher bloodEssenceExtractMatcher = BLOOD_ESSENCE_EXTRACT_PATTERN.matcher(message);
 			Matcher braceletOfClayCheckMatcher = BRACELET_OF_CLAY_CHECK_PATTERN.matcher(message);
+			Matcher ardyCloakUseMatcher = ARDY_CLOAK_ACTIVATE_PATTERN.matcher(message);
 
 			if (config.recoilNotification() && message.contains(RING_OF_RECOIL_BREAK_MESSAGE))
 			{
@@ -482,6 +495,16 @@ public class ItemChargePlugin extends Plugin
 				}
 				updateBraceletOfClayCharges(MAX_BRACELET_OF_CLAY_CHARGES);
 			}
+			else if (ardyCloakUseMatcher.find())
+			{
+				final int chargesUsed = Integer.parseInt(ardyCloakUseMatcher.group(1));
+				final int maxCharges = Integer.parseInt(ardyCloakUseMatcher.group(2));
+				updateArdyCloakCharges(maxCharges - chargesUsed);
+			}
+			else if (message.equals(ARDY_CLOAK_NO_CHARGES_TEXT))
+			{
+				updateArdyCloakCharges(0);
+			}
 		}
 	}
 
@@ -558,6 +581,36 @@ public class ItemChargePlugin extends Plugin
 		}
 	}
 
+	@Subscribe
+	private void onGameTick(GameTick event)
+	{
+		long currentTime = System.currentTimeMillis();
+		boolean dailyReset = !loggingIn && currentTime - lastReset > ONE_DAY;
+
+		if ((dailyReset || loggingIn)
+			&& client.getVar(VarClientInt.MEMBERSHIP_STATUS) == 1)
+		{
+			// Round down to the nearest day
+			lastReset = (long) Math.floor(currentTime / ONE_DAY) * ONE_DAY;
+			loggingIn = false;
+
+			checkArdyCloakCharges(dailyReset);
+		}
+	}
+
+	private void checkArdyCloakCharges(boolean dailyReset)
+	{
+		// Excluding EASY since there are no farm teles for that and ELITE has unlimited
+		// thus no sense tracking charges for that item
+		final int maxCharges = client.getVarbitValue(Varbits.DIARY_ARDOUGNE_HARD) == 1
+			? 5 : client.getVarbitValue(Varbits.DIARY_ARDOUGNE_MEDIUM) == 1
+			? 3 : 0;
+		if (dailyReset && maxCharges != 0)
+		{
+			updateArdyCloakCharges(maxCharges);
+		}
+	}
+
 	private void updateDodgyNecklaceCharges(final int value)
 	{
 		setItemCharges(ItemChargeConfig.KEY_DODGY_NECKLACE, value);
@@ -616,6 +669,12 @@ public class ItemChargePlugin extends Plugin
 	private void updateBraceletOfClayCharges(final int value)
 	{
 		setItemCharges(ItemChargeConfig.KEY_BRACELET_OF_CLAY, value);
+		updateInfoboxes();
+	}
+
+	private void updateArdyCloakCharges(final int value)
+	{
+		setItemCharges(ItemChargeConfig.KEY_ARDY_CLOAK, value);
 		updateInfoboxes();
 	}
 
