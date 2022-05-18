@@ -47,6 +47,7 @@ public interface ItemChargeConfig extends Config
 	String KEY_EXPLORERS_RING = "explorerRing";
 	String KEY_RING_OF_FORGING = "ringOfForging";
 	String KEY_BLOOD_ESSENCE = "bloodEssence";
+	String KEY_ARDY_CLOAK = "ardycloak";
 
 	@ConfigSection(
 		name = "Charge Settings",
@@ -425,6 +426,18 @@ public interface ItemChargeConfig extends Config
 		section = chargesSection
 	)
 	default boolean showBloodEssenceCharges()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "showArdyCloakCharges",
+		name = "Ardy Cloak Charges",
+		description = "Show charges left on Ardy Cloak",
+		position = 31,
+		section = chargesSection
+	)
+	default boolean showArdyCloakCharges()
 	{
 		return true;
 	}
