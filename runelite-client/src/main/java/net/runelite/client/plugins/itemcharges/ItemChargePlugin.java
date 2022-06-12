@@ -44,8 +44,10 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
+import net.runelite.api.VarClientInt;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.VarbitChanged;
@@ -137,6 +139,8 @@ public class ItemChargePlugin extends Plugin
 		"You manage to extract power from the Blood Essence and craft (\\d{1,3}) extra runes?\\."
 	);
 	private static final String BLOOD_ESSENCE_ACTIVATE_TEXT = "You activate the blood essence.";
+	private static final Pattern ARDY_CLOAK_ACTIVATE_PATTERN = Pattern.compile("You have used (\\d) of your (\\d) Ardougne Farm teleports for today.");
+	private static final String ARDY_CLOAK_NO_CHARGES_TEXT = "You have already used all of your available teleports for today. Try again tomorrow when the cape has recharged.";
 
 	private static final int MAX_DODGY_CHARGES = 10;
 	private static final int MAX_BINDING_CHARGES = 16;
@@ -146,6 +150,7 @@ public class ItemChargePlugin extends Plugin
 	private static final int MAX_AMULET_OF_BOUNTY_CHARGES = 10;
 	private static final int MAX_SLAYER_BRACELET_CHARGES = 30;
 	private static final int MAX_BLOOD_ESSENCE_CHARGES = 1000;
+	private static final int ONE_DAY = 86400000;
 
 	private int lastExplorerRingCharge = -1;
 
@@ -179,6 +184,9 @@ public class ItemChargePlugin extends Plugin
 	// Limits destroy callback to once per tick
 	private int lastCheckTick;
 	private final Map<EquipmentInventorySlot, ItemChargeInfobox> infoboxes = new EnumMap<>(EquipmentInventorySlot.class);
+
+	private long lastReset;
+	private boolean loggingIn;
 
 	@Provides
 	ItemChargeConfig getConfig(ConfigManager configManager)
@@ -237,6 +245,7 @@ public class ItemChargePlugin extends Plugin
 			Matcher expeditiousCheckMatcher = EXPEDITIOUS_BRACELET_CHECK_PATTERN.matcher(message);
 			Matcher bloodEssenceCheckMatcher = BLOOD_ESSENCE_CHECK_PATTERN.matcher(message);
 			Matcher bloodEssenceExtractMatcher = BLOOD_ESSENCE_EXTRACT_PATTERN.matcher(message);
+			Matcher ardyCloakUseMatcher = ARDY_CLOAK_ACTIVATE_PATTERN.matcher(message);
 
 			if (config.recoilNotification() && message.contains(RING_OF_RECOIL_BREAK_MESSAGE))
 			{
@@ -439,6 +448,16 @@ public class ItemChargePlugin extends Plugin
 			{
 				updateBloodEssenceCharges(MAX_BLOOD_ESSENCE_CHARGES);
 			}
+			else if (ardyCloakUseMatcher.find())
+			{
+				final int chargesUsed = Integer.parseInt(ardyCloakUseMatcher.group(1));
+				final int maxCharges = Integer.parseInt(ardyCloakUseMatcher.group(2));
+				updateArdyCloakCharges(maxCharges - chargesUsed);
+			}
+			else if (message.equals(ARDY_CLOAK_NO_CHARGES_TEXT))
+			{
+				updateArdyCloakCharges(0);
+			}
 		}
 	}
 
@@ -517,6 +536,36 @@ public class ItemChargePlugin extends Plugin
 		}
 	}
 
+	@Subscribe
+	private void onGameTick(GameTick event)
+	{
+		long currentTime = System.currentTimeMillis();
+		boolean dailyReset = !loggingIn && currentTime - lastReset > ONE_DAY;
+
+		if ((dailyReset || loggingIn)
+			&& client.getVar(VarClientInt.MEMBERSHIP_STATUS) == 1)
+		{
+			// Round down to the nearest day
+			lastReset = (long) Math.floor(currentTime / ONE_DAY) * ONE_DAY;
+			loggingIn = false;
+
+			checkArdyCloakCharges(dailyReset);
+		}
+	}
+
+	private void checkArdyCloakCharges(boolean dailyReset)
+	{
+		// Excluding EASY since there are no farm teles for that and ELITE has unlimited
+		// thus no sense tracking charges for that item
+		final int maxCharges = client.getVarbitValue(Varbits.DIARY_ARDOUGNE_MEDIUM) == 1
+			? 3 : client.getVarbitValue(Varbits.DIARY_ARDOUGNE_HARD) == 1
+			? 5 : 0;
+		if (dailyReset && maxCharges != 0)
+		{
+			updateArdyCloakCharges(maxCharges);
+		}
+	}
+
 	private void updateDodgyNecklaceCharges(final int value)
 	{
 		setItemCharges(ItemChargeConfig.KEY_DODGY_NECKLACE, value);
@@ -569,6 +618,12 @@ public class ItemChargePlugin extends Plugin
 	private void updateBloodEssenceCharges(final int value)
 	{
 		setItemCharges(ItemChargeConfig.KEY_BLOOD_ESSENCE, value);
+		updateInfoboxes();
+	}
+
+	private void updateArdyCloakCharges(final int value)
+	{
+		setItemCharges(ItemChargeConfig.KEY_ARDY_CLOAK, value);
 		updateInfoboxes();
 	}
 

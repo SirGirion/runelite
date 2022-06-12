@@ -52,7 +52,8 @@ enum ItemChargeType
 	RING_OF_FORGING(ItemChargeConfig::showRingOfForgingCount),
 	POTION(ItemChargeConfig::showPotionDoseCount),
 	GUTHIX_REST(ItemChargeConfig::showGuthixRestDoses),
-	BLOOD_ESSENCE(ItemChargeConfig::showBloodEssenceCharges);
+	BLOOD_ESSENCE(ItemChargeConfig::showBloodEssenceCharges),
+	ARDY_CLOAK(ItemChargeConfig::showArdyCloakCharges);
 
 	private final Predicate<ItemChargeConfig> enabled;
 }

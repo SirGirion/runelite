@@ -97,6 +97,10 @@ public class ItemChargePluginTest
 	private static final String EXTRACT_BLOOD_ESSENCE = "You manage to extract power from the Blood Essence and craft 67 extra runes.";
 	private static final String CHECK_BLOOD_ESSENCE = "Your blood essence has 56 charges remaining";
 
+	private static final String ACTIVATE_ARDY_CLOAK_2 = "You have used 2 of your 3 Ardougne Farm teleports for today.";
+	private static final String ACTIVATE_ARDY_CLOAK_3 = "You have used 3 of your 5 Ardougne Farm teleports for today.";
+	private static final String ACTIVATE_ARDY_CLOAK_EXHAUSTED = "You have already used all of your available teleports for today. Try again tomorrow when the cape has recharged.";
+
 	@Mock
 	@Bind
 	private Client client;
@@ -449,5 +453,29 @@ public class ItemChargePluginTest
 		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", CHECK_BLOOD_ESSENCE, "", 0);
 		itemChargePlugin.onChatMessage(chatMessage);
 		verify(configManager).setRSProfileConfiguration(ItemChargeConfig.GROUP, ItemChargeConfig.KEY_BLOOD_ESSENCE, 56);
+	}
+
+	@Test
+	public void testArdyCloak2Activate()
+	{
+		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", ACTIVATE_ARDY_CLOAK_2, "", 0);
+		itemChargePlugin.onChatMessage(chatMessage);
+		verify(configManager).setRSProfileConfiguration(ItemChargeConfig.GROUP, ItemChargeConfig.KEY_ARDY_CLOAK, 1);
+	}
+
+	@Test
+	public void testArdyCloak3Activate()
+	{
+		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", ACTIVATE_ARDY_CLOAK_3, "", 0);
+		itemChargePlugin.onChatMessage(chatMessage);
+		verify(configManager).setRSProfileConfiguration(ItemChargeConfig.GROUP, ItemChargeConfig.KEY_ARDY_CLOAK, 2);
+	}
+
+	@Test
+	public void testArdyCloakExhausted()
+	{
+		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", ACTIVATE_ARDY_CLOAK_EXHAUSTED, "", 0);
+		itemChargePlugin.onChatMessage(chatMessage);
+		verify(configManager).setRSProfileConfiguration(ItemChargeConfig.GROUP, ItemChargeConfig.KEY_ARDY_CLOAK, 0);
 	}
 }
