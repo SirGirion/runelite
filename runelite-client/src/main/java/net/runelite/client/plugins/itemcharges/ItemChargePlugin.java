@@ -557,9 +557,9 @@ public class ItemChargePlugin extends Plugin
 	{
 		// Excluding EASY since there are no farm teles for that and ELITE has unlimited
 		// thus no sense tracking charges for that item
-		final int maxCharges = client.getVarbitValue(Varbits.DIARY_ARDOUGNE_MEDIUM) == 1
-			? 3 : client.getVarbitValue(Varbits.DIARY_ARDOUGNE_HARD) == 1
-			? 5 : 0;
+		final int maxCharges = client.getVarbitValue(Varbits.DIARY_ARDOUGNE_HARD) == 1
+			? 5 : client.getVarbitValue(Varbits.DIARY_ARDOUGNE_MEDIUM) == 1
+			? 3 : 0;
 		if (dailyReset && maxCharges != 0)
 		{
 			updateArdyCloakCharges(maxCharges);
