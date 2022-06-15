@@ -139,6 +139,11 @@ public class ItemChargePlugin extends Plugin
 		"You manage to extract power from the Blood Essence and craft (\\d{1,3}) extra runes?\\."
 	);
 	private static final String BLOOD_ESSENCE_ACTIVATE_TEXT = "You activate the blood essence.";
+	private static final String BRACELET_OF_CLAY_USE_TEXT = "You manage to mine some clay.";
+	private static final String BRACELET_OF_CLAY_BREAK_TEXT = "Your bracelet of clay crumbles to dust.";
+	private static final Pattern BRACELET_OF_CLAY_CHECK_PATTERN = Pattern.compile(
+		"You can mine (\\d{1,2}) more pieces? of soft clay before your bracelet crumbles to dust\\."
+	);
 	private static final Pattern ARDY_CLOAK_ACTIVATE_PATTERN = Pattern.compile("You have used (\\d) of your (\\d) Ardougne Farm teleports for today.");
 	private static final String ARDY_CLOAK_NO_CHARGES_TEXT = "You have already used all of your available teleports for today. Try again tomorrow when the cape has recharged.";
 
@@ -150,6 +155,7 @@ public class ItemChargePlugin extends Plugin
 	private static final int MAX_AMULET_OF_BOUNTY_CHARGES = 10;
 	private static final int MAX_SLAYER_BRACELET_CHARGES = 30;
 	private static final int MAX_BLOOD_ESSENCE_CHARGES = 1000;
+	private static final int MAX_BRACELET_OF_CLAY_CHARGES = 28;
 	private static final int ONE_DAY = 86400000;
 
 	private int lastExplorerRingCharge = -1;
@@ -245,6 +251,7 @@ public class ItemChargePlugin extends Plugin
 			Matcher expeditiousCheckMatcher = EXPEDITIOUS_BRACELET_CHECK_PATTERN.matcher(message);
 			Matcher bloodEssenceCheckMatcher = BLOOD_ESSENCE_CHECK_PATTERN.matcher(message);
 			Matcher bloodEssenceExtractMatcher = BLOOD_ESSENCE_EXTRACT_PATTERN.matcher(message);
+			Matcher braceletOfClayCheckMatcher = BRACELET_OF_CLAY_CHECK_PATTERN.matcher(message);
 			Matcher ardyCloakUseMatcher = ARDY_CLOAK_ACTIVATE_PATTERN.matcher(message);
 
 			if (config.recoilNotification() && message.contains(RING_OF_RECOIL_BREAK_MESSAGE))
@@ -448,6 +455,29 @@ public class ItemChargePlugin extends Plugin
 			{
 				updateBloodEssenceCharges(MAX_BLOOD_ESSENCE_CHARGES);
 			}
+			else if (braceletOfClayCheckMatcher.find())
+			{
+				updateBraceletOfClayCharges(Integer.parseInt(braceletOfClayCheckMatcher.group(1)));
+			}
+			else if (message.equals(BRACELET_OF_CLAY_USE_TEXT))
+			{
+				final ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
+
+				// Determine if the player mined with a Bracelet of Clay equipped.
+				if (equipment != null && equipment.contains(ItemID.BRACELET_OF_CLAY))
+				{
+					int charges = Ints.constrainToRange(getItemCharges(ItemChargeConfig.KEY_BRACELET_OF_CLAY) - 1, 0, MAX_BRACELET_OF_CLAY_CHARGES);
+					updateBraceletOfClayCharges(charges);
+				}
+			}
+			else if (message.equals(BRACELET_OF_CLAY_BREAK_TEXT))
+			{
+				if (config.braceletOfClayNotification())
+				{
+					notifier.notify("Your bracelet of clay has crumbled to dust");
+				}
+				updateBraceletOfClayCharges(MAX_BRACELET_OF_CLAY_CHARGES);
+			}
 			else if (ardyCloakUseMatcher.find())
 			{
 				final int chargesUsed = Integer.parseInt(ardyCloakUseMatcher.group(1));
@@ -618,6 +648,12 @@ public class ItemChargePlugin extends Plugin
 	private void updateBloodEssenceCharges(final int value)
 	{
 		setItemCharges(ItemChargeConfig.KEY_BLOOD_ESSENCE, value);
+		updateInfoboxes();
+	}
+
+	private void updateBraceletOfClayCharges(final int value)
+	{
+		setItemCharges(ItemChargeConfig.KEY_BRACELET_OF_CLAY, value);
 		updateInfoboxes();
 	}
 
