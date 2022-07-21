@@ -128,4 +128,15 @@ public interface GauntletConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		position = 11,
+		keyName = "useLegacyMode",
+		name = "Use legacy detection mode",
+		description = "Uses sounds to count attacks instead of projectiles"
+	)
+	default boolean useLegacyMode()
+	{
+		return false;
+	}
 }

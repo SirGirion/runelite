@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
@@ -21,7 +22,6 @@ import net.runelite.api.Tile;
 import net.runelite.api.TileObject;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.AnimationChanged;
-import net.runelite.api.events.GameObjectChanged;
 import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
@@ -29,6 +29,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.events.SoundEffectPlayed;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.widgets.Widget;
@@ -45,6 +46,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 
+@Slf4j
 @PluginDescriptor(
 	name = "Gauntlet",
 	description = "Helpful hunleffOverlay for completing the Gauntlet",
@@ -215,7 +217,7 @@ public class GauntletPlugin extends Plugin
 	@Subscribe
 	public void onSoundEffectPlayed(final SoundEffectPlayed event)
 	{
-		if (!inBossFight())
+		if (!inBossFight() || !config.useLegacyMode())
 		{
 			return;
 		}
@@ -227,19 +229,47 @@ public class GauntletPlugin extends Plugin
 		{
 			if (hunllef.isMagicNext() ? GauntletSounds.isCountableMagic(id) : GauntletSounds.isCountableRanged(id))
 			{
-				hunllef.countHunllefAttack();
+				handleHunllefAttack();
+			}
+		}
+	}
 
-				final SoundMode mode = config.hunllefStyleChangeSound();
-				final int attackCount = hunllef.getAttackCount();
+	private void handleHunllefAttack()
+	{
+		hunllef.countHunllefAttack();
 
-				if (mode == SoundMode.ONE && attackCount == (Hunllef.ATTACK_SWITCH_INTERVAL - 1))
-				{
-					playSound(HUNLLEF_ATTACK_SWITCH_SOUND);
-				}
-				else if (mode == SoundMode.ZERO && attackCount == 0)
-				{
-					playSound(HUNLLEF_ATTACK_SWITCH_SOUND);
-				}
+		final SoundMode mode = config.hunllefStyleChangeSound();
+		final int attackCount = hunllef.getAttackCount();
+
+		if (mode == SoundMode.ONE && attackCount == (Hunllef.ATTACK_SWITCH_INTERVAL - 1))
+		{
+			playSound(HUNLLEF_ATTACK_SWITCH_SOUND);
+		}
+		else if (mode == SoundMode.ZERO && attackCount == 0)
+		{
+			playSound(HUNLLEF_ATTACK_SWITCH_SOUND);
+		}
+	}
+
+	@Subscribe
+	private void onProjectileMoved(final ProjectileMoved event)
+	{
+		if (!inBossFight() || config.useLegacyMode())
+		{
+			return;
+		}
+
+		if (client.getGameCycle() >= event.getProjectile().getStartCycle())
+		{
+			return;
+		}
+
+		final int projectileId = event.getProjectile().getId();
+		if (GauntletProjectiles.isCountableMagic(projectileId) || GauntletProjectiles.isCountableRanged(projectileId))
+		{
+			if (hunllef.isMagicNext() ? GauntletProjectiles.isCountableMagic(projectileId) : GauntletProjectiles.isCountableRanged(projectileId))
+			{
+				handleHunllefAttack();
 			}
 		}
 	}
@@ -282,6 +312,10 @@ public class GauntletPlugin extends Plugin
 					playSound(HUNLLEF_PRAYER_SWITCH_SOUND);
 				}
 			}
+		}
+		if (GauntletAnimations.isHunllefAttack(id))
+		{
+			handleHunllefAttack();
 		}
 	}
 
@@ -344,17 +378,6 @@ public class GauntletPlugin extends Plugin
 		}
 
 		onTileObject(event.getTile(), null, event.getGameObject());
-	}
-
-	@Subscribe
-	public void onGameObjectChanged(GameObjectChanged event)
-	{
-		if (!inGauntlet)
-		{
-			return;
-		}
-
-		onTileObject(event.getTile(), event.getPrevious(), event.getGameObject());
 	}
 
 	@Subscribe

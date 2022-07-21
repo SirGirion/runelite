@@ -8,6 +8,7 @@ public class GauntletAnimations
 	private static final int PLAYER_MELEE_HALBERD = 440;
 	private static final int PLAYER_RANGED = 426;
 	private static final int PLAYER_MAGIC = 1167;
+	private static final int HUNLLEF_TORNADO = 8418;
 
 	protected static boolean isPlayerAttack(final int id)
 	{
@@ -19,6 +20,17 @@ public class GauntletAnimations
 			case PLAYER_MELEE_HALBERD:
 			case PLAYER_RANGED:
 			case PLAYER_MAGIC:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	protected static boolean isHunllefAttack(final int id)
+	{
+		switch (id)
+		{
+			case HUNLLEF_TORNADO:
 				return true;
 			default:
 				return false;
