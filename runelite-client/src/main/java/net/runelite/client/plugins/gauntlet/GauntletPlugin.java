@@ -265,6 +265,7 @@ public class GauntletPlugin extends Plugin
 		}
 
 		final int projectileId = event.getProjectile().getId();
+		log.info("projectile id {}", projectileId);
 		if (GauntletProjectiles.isCountableMagic(projectileId) || GauntletProjectiles.isCountableRanged(projectileId))
 		{
 			if (hunllef.isMagicNext() ? GauntletProjectiles.isCountableMagic(projectileId) : GauntletProjectiles.isCountableRanged(projectileId))
@@ -283,12 +284,17 @@ public class GauntletPlugin extends Plugin
 		}
 
 		final Player localPlayer = client.getLocalPlayer();
-		if (localPlayer == null || localPlayer != event.getActor())
+		if (localPlayer == null)
 		{
 			return;
 		}
 
-		final int id = localPlayer.getAnimation();
+		if (event.getActor() != localPlayer && event.getActor() != hunllef.getNpc())
+		{
+			return;
+		}
+
+		final int id = event.getActor().getAnimation();
 
 		// Player attacks
 		if (GauntletAnimations.isPlayerAttack(id))

@@ -139,4 +139,15 @@ public interface GauntletConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		position = 12,
+		keyName = "showResourceMap",
+		name = "Show resource mini map",
+		description = "Shows a grid map of resource counts/location"
+	)
+	default boolean showResourceMap()
+	{
+		return true;
+	}
 }
