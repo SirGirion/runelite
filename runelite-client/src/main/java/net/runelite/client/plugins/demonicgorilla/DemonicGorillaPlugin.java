@@ -34,6 +34,7 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.HeadIcon;
 import net.runelite.api.Hitsplat;
+import net.runelite.api.HitsplatID;
 import net.runelite.api.NPC;
 import net.runelite.api.NpcID;
 import net.runelite.api.Player;
@@ -506,7 +507,7 @@ public class DemonicGorillaPlugin extends Plugin {
                     // projectile was travelling. So we assume the hit was a 0.
                     shouldDecreaseCounter = true;
                 } else if (target.getRecentHitsplats().stream()
-                        .anyMatch(x -> x.getHitsplatType() == Hitsplat.HitsplatType.BLOCK_ME || x.getHitsplatType() == Hitsplat.HitsplatType.BLOCK_OTHER)) {
+                        .anyMatch(x -> x.getHitsplatType() == HitsplatID.BLOCK_ME || x.getHitsplatType() == HitsplatID.BLOCK_OTHER)) {
                     // A blue hitsplat appeared, so we assume the gorilla hit a 0
                     shouldDecreaseCounter = true;
                 }
@@ -542,9 +543,9 @@ public class DemonicGorillaPlugin extends Plugin {
             }
         } else if (event.getActor() instanceof NPC) {
             DemonicGorilla gorilla = gorillas.get(event.getActor());
-            Hitsplat.HitsplatType hitsplatType = event.getHitsplat().getHitsplatType();
-            if (gorilla != null && (hitsplatType == Hitsplat.HitsplatType.BLOCK_ME || hitsplatType == Hitsplat.HitsplatType.BLOCK_OTHER ||
-                    hitsplatType == Hitsplat.HitsplatType.DAMAGE_ME || hitsplatType == Hitsplat.HitsplatType.DAMAGE_OTHER)) {
+            int hitsplatType = event.getHitsplat().getHitsplatType();
+            if (gorilla != null && (hitsplatType == HitsplatID.BLOCK_ME || hitsplatType == HitsplatID.BLOCK_OTHER ||
+                    hitsplatType == HitsplatID.DAMAGE_ME || hitsplatType == HitsplatID.DAMAGE_OTHER)) {
                 gorilla.setTakenDamageRecently(true);
             }
         }
