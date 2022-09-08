@@ -184,7 +184,7 @@ public class GauntletPlugin extends Plugin
 	@Subscribe
 	public void onVarbitChanged(final VarbitChanged event)
 	{
-		final int inGame = client.getVar(IN_GAUNTLET);
+		final int inGame = client.getVarbitValue(IN_GAUNTLET);
 
 		if (inGame != inGameBit && inGame == 1)
 		{
