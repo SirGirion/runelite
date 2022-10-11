@@ -405,6 +405,7 @@ class LootTrackerPanel extends PluginPanel
 	void clearRecords()
 	{
 		aggregateRecords.clear();
+		sessionRecords.clear();
 	}
 
 	/**
