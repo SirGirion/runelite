@@ -49,6 +49,7 @@ public interface ItemChargeConfig extends Config
 	String KEY_BLOOD_ESSENCE = "bloodEssence";
 	String KEY_ARDY_CLOAK = "ardycloak";
 	String KEY_BRACELET_OF_CLAY = "braceletOfClay";
+	String KEY_ARDY_CLOAK = "ardycloak";
 
 	@ConfigSection(
 		name = "Charge Settings",

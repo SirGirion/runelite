@@ -50,6 +50,7 @@ import net.runelite.api.Varbits;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.VarbitChanged;
@@ -225,6 +226,7 @@ public class ItemChargePlugin extends Plugin
 		if (e.getGameState() == GameState.LOGGING_IN)
 		{
 			updateExplorerRingCharges(0);
+			loggingIn = true;
 		}
 	}
 
