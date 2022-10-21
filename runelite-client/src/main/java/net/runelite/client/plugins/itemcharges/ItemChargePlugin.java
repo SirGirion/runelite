@@ -49,10 +49,7 @@ import net.runelite.api.VarClientInt;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
-<<<<<<< HEAD
-=======
 import net.runelite.api.events.GameTick;
->>>>>>> b45b294c0 (itemcharges: track ardy cloak charges left)
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.VarbitChanged;
