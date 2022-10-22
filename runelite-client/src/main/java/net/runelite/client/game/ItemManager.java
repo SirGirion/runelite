@@ -49,10 +49,14 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import static net.runelite.api.Constants.CLIENT_DEFAULT_ZOOM;
+import net.runelite.api.EnumComposition;
+import net.runelite.api.EnumID;
 import net.runelite.api.GameState;
 import net.runelite.api.ItemComposition;
 import static net.runelite.api.ItemID.*;
 import net.runelite.api.SpritePixels;
+import net.runelite.api.Varbits;
+import net.runelite.api.annotations.Varbit;
 import net.runelite.api.widgets.ItemQuantityMode;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.RuneLiteConfig;
@@ -173,6 +177,14 @@ public class ItemManager
 		put(AGILITY_CAPE_13340, AGILITY_CAPE).
 		build();
 
+	private static final int NUM_SLOTS = 4;
+	private static final int[] AMOUNT_VARBITS = {
+		Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3, Varbits.RUNE_POUCH_AMOUNT4
+	};
+	private static final int[] RUNE_VARBITS = {
+		Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3, Varbits.RUNE_POUCH_RUNE4
+	};
+
 	@Inject
 	public ItemManager(Client client, ScheduledExecutorService scheduledExecutorService, ClientThread clientThread,
 		ItemClient itemClient, RuneLiteConfig runeLiteConfig)
@@ -278,6 +290,28 @@ public class ItemManager
 		if (itemID == PLATINUM_TOKEN)
 		{
 			return 1000;
+		}
+		if (itemID == RUNE_POUCH || itemID == DIVINE_RUNE_POUCH)
+		{
+			final EnumComposition runepouchEnum = client.getEnum(EnumID.RUNEPOUCH_RUNE);
+			// At most 4 slots, 16k runes per slot, each rune would need to be over 33k
+			// for this to overflow
+			int pouchPrice = 0;
+			for (int i = 0; i < NUM_SLOTS; i++)
+			{
+				@Varbit int amountVarbit = AMOUNT_VARBITS[i];
+				int amount = client.getVarbitValue(amountVarbit);
+
+				@Varbit int runeVarbit = RUNE_VARBITS[i];
+				int runeId = client.getVarbitValue(runeVarbit);
+
+				if (runeId != 0 && amount > 0)
+				{
+					final ItemComposition runeComposition = getItemComposition(runepouchEnum.getIntValue(runeId));
+					pouchPrice += getItemPrice(runeComposition.getId()) * amount;
+				}
+			}
+			return pouchPrice;
 		}
 
 		ItemComposition itemComposition = getItemComposition(itemID);
