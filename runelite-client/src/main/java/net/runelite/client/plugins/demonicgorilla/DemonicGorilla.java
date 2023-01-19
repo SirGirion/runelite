@@ -131,10 +131,7 @@ public class DemonicGorilla
 	public HeadIcon getOverheadIcon()
 	{
 		NPCComposition composition = this.npc.getComposition();
-		if (composition != null)
-		{
-			return composition.getOverheadIcon();
-		}
+		// TODO: Can this be fixed?
 		return null;
 	}
 }

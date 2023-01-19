@@ -60,7 +60,8 @@ class Hunllef
 			return null;
 		}
 
-		final HeadIcon icon = comp.getOverheadIcon();
+		// TODO: Can this be fixed
+		final HeadIcon icon = null;
 		if (icon == null)
 		{
 			return null;
