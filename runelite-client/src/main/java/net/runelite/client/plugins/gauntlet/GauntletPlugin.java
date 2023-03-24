@@ -265,7 +265,6 @@ public class GauntletPlugin extends Plugin
 		}
 
 		final int projectileId = event.getProjectile().getId();
-		log.info("projectile id {}", projectileId);
 		if (GauntletProjectiles.isCountableMagic(projectileId) || GauntletProjectiles.isCountableRanged(projectileId))
 		{
 			if (hunllef.isMagicNext() ? GauntletProjectiles.isCountableMagic(projectileId) : GauntletProjectiles.isCountableRanged(projectileId))
