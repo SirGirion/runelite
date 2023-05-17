@@ -96,11 +96,11 @@ public class GauntletPlugin extends Plugin
 	@Inject
 	private GauntletOverlay overlay;
 
-	private static final Set<Integer> FISH_SPOTS = ImmutableSet.of(ObjectID.FISHING_SPOT_35971, ObjectID.FISHING_SPOT_36068);
-	private static final Set<Integer> WOOL_SPOTS = ImmutableSet.of(ObjectID.LINUM_TIRINUM, ObjectID.LINUM_TIRINUM_36072);
-	private static final Set<Integer> WOOD_SPOTS = ImmutableSet.of(ObjectID.PHREN_ROOTS, ObjectID.PHREN_ROOTS_36066);
+	private static final Set<Integer> FISH_SPOTS = ImmutableSet.of(ObjectID.FISHING_SPOT_36068, ObjectID.CORRUPT_FISHING_SPOT);
+	private static final Set<Integer> WOOL_SPOTS = ImmutableSet.of(ObjectID.LINUM_TIRINUM, ObjectID.CORRUPT_LINUM_TIRINUM);
+	private static final Set<Integer> WOOD_SPOTS = ImmutableSet.of(ObjectID.PHREN_ROOTS, ObjectID.CORRUPT_PHREN_ROOTS);
 	private static final Set<Integer> ORE_SPOTS = ImmutableSet.of(ObjectID.CORRUPT_DEPOSIT, ObjectID.CRYSTAL_DEPOSIT);
-	private static final Set<Integer> HERB_SPAWNS = ImmutableSet.of(ObjectID.GRYM_ROOT, ObjectID.GRYM_ROOT_36070);
+	private static final Set<Integer> HERB_SPAWNS = ImmutableSet.of(ObjectID.GRYM_ROOT, ObjectID.CORRUPT_GRYM_ROOT);
 
 	private BufferedImage fishIcon;
 	private BufferedImage woolIcon;
