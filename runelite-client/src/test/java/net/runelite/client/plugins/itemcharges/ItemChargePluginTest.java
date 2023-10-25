@@ -44,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -99,6 +100,9 @@ public class ItemChargePluginTest
 	private static final String CHECK_BLOOD_ESSENCE = "Your blood essence has 56 charges remaining";
 	private static final String CHECK_BRACELET_OF_CLAY = "You can mine 13 more pieces of soft clay before your bracelet crumbles to dust.";
 	private static final String USED_BRACELET_OF_CLAY = "You manage to mine some clay.";
+
+	private static final String USED_BRACELET_OF_CLAY_TRAHAEARN = "You manage to mine some soft clay.";
+
 	private static final String BREAK_BRACELET_OF_CLAY = "Your bracelet of clay crumbles to dust.";
 
 	private static final String ACTIVATE_ARDY_CLOAK_2 = "You have used 2 of your 3 Ardougne Farm teleports for today.";
@@ -530,5 +534,53 @@ public class ItemChargePluginTest
 		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", ACTIVATE_ARDY_CLOAK_EXHAUSTED, "", 0);
 		itemChargePlugin.onChatMessage(chatMessage);
 		verify(configManager).setRSProfileConfiguration(ItemChargeConfig.GROUP, ItemChargeConfig.KEY_ARDY_CLOAK, 0);
+	}
+
+	@Test
+	public void testBraceletOfClayUseTrahaearn()
+	{
+		// Set bracelet of clay charges to 13
+		when(configManager.getRSProfileConfiguration(ItemChargeConfig.GROUP, ItemChargeConfig.KEY_BRACELET_OF_CLAY, Integer.class))
+			.thenReturn(13);
+
+		// Equip bracelet of clay
+		ItemContainer equipmentItemContainer = mock(ItemContainer.class);
+		when(client.getItemContainer(InventoryID.EQUIPMENT))
+			.thenReturn(equipmentItemContainer);
+		when(equipmentItemContainer.contains(ItemID.BRACELET_OF_CLAY)).thenReturn(true);
+		when(equipmentItemContainer.getItems()).thenReturn(new Item[0]);
+
+		// Set inventory to 2 free slots
+		ItemContainer inventoryItemContainer = mock(ItemContainer.class);
+		when(inventoryItemContainer.count()).thenReturn(26);
+		when(client.getItemContainer(InventoryID.INVENTORY)).thenReturn(inventoryItemContainer);
+
+		// Verify bracelet of clay charges decreased
+		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", USED_BRACELET_OF_CLAY_TRAHAEARN, "", 0);
+		itemChargePlugin.onChatMessage(chatMessage);
+		verify(configManager).setRSProfileConfiguration(ItemChargeConfig.GROUP, ItemChargeConfig.KEY_BRACELET_OF_CLAY, 12);
+	}
+
+	@Test
+	public void testBraceletOfClayUseTrahaearn1FreeInvSlot()
+	{
+		// Equip bracelet of clay
+		ItemContainer equipmentItemContainer = mock(ItemContainer.class);
+		when(client.getItemContainer(InventoryID.EQUIPMENT))
+			.thenReturn(equipmentItemContainer);
+		when(equipmentItemContainer.contains(ItemID.BRACELET_OF_CLAY))
+			.thenReturn(true);
+
+		// Set inventory to 1 free slots
+		ItemContainer inventoryItemContainer = mock(ItemContainer.class);
+		when(inventoryItemContainer.count())
+			.thenReturn(27);
+		when(client.getItemContainer(InventoryID.INVENTORY))
+			.thenReturn(inventoryItemContainer);
+
+		// Verify bracelet of clay charges were not changed
+		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", USED_BRACELET_OF_CLAY_TRAHAEARN, "", 0);
+		itemChargePlugin.onChatMessage(chatMessage);
+		verify(configManager, Mockito.times(0)).setRSProfileConfiguration(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt());
 	}
 }
